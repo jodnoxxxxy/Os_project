@@ -1,0 +1,6 @@
+{
+  "name": "OSLab - Operating System Simulator & Project Report Generator",
+  "description": "An interactive OS mini project simulator for CPU Scheduling, Page Replacement, Disk Scheduling, and Deadlock Avoidance with comprehensive academic lab report generation and PDF export.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
