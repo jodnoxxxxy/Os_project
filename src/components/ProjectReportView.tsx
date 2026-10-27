@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
-  BankersResult,
   BankersState,
   CpuAlgorithm,
   CpuSchedulingResult,
@@ -17,18 +16,16 @@ import { getPageAlgorithmName, simulatePageReplacement } from '../algorithms/pag
 import { getDiskAlgorithmName, simulateDiskScheduling } from '../algorithms/diskScheduling';
 import { runBankersSafety } from '../algorithms/bankersAlgorithm';
 import {
-  Printer,
-  Download,
-  Copy,
   Check,
+  Copy,
+  Cpu,
+  Download,
   Edit3,
   FileText,
-  Award,
-  Layers,
   HardDrive,
+  Layers,
+  Printer,
   ShieldCheck,
-  Cpu,
-  GraduationCap,
 } from 'lucide-react';
 
 interface ProjectReportViewProps {
@@ -40,9 +37,44 @@ interface ProjectReportViewProps {
   diskMaxCylinder: number;
   diskDirection: DiskDirection;
   bankersState: BankersState;
+  roundRobinQuantum: number;
   studentInfo: StudentReportInfo;
   onUpdateStudentInfo: (info: StudentReportInfo) => void;
+  onNotify: (message: string) => void;
 }
+
+function formatDate(value: string): string {
+  if (!value) return 'Not set';
+  const date = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+function safeFilename(value: string): string {
+  return value.replace(/[^a-z0-9_-]+/gi, '_').replace(/^_+|_+$/g, '') || 'student';
+}
+
+interface FieldProps {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  type?: string;
+  placeholder?: string;
+  wide?: boolean;
+}
+
+const Field: React.FC<FieldProps> = ({ label, value, onChange, type = 'text', placeholder, wide }) => (
+  <label className={wide ? 'sm:col-span-2' : undefined}>
+    <span className="mb-1 block text-xs text-slate-400">{label}</span>
+    <input
+      type={type}
+      value={value}
+      placeholder={placeholder}
+      onChange={(event) => onChange(event.target.value)}
+      className="w-full rounded border border-slate-700 bg-slate-950 px-2.5 py-1.5 text-xs text-slate-100 placeholder:text-slate-600 focus:border-indigo-500 focus:outline-none"
+    />
+  </label>
+);
 
 export const ProjectReportView: React.FC<ProjectReportViewProps> = ({
   processes,
@@ -53,678 +85,736 @@ export const ProjectReportView: React.FC<ProjectReportViewProps> = ({
   diskMaxCylinder,
   diskDirection,
   bankersState,
+  roundRobinQuantum,
   studentInfo,
   onUpdateStudentInfo,
+  onNotify,
 }) => {
-  const [copied, setCopied] = useState(false);
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle');
   const [isEditingInfo, setIsEditingInfo] = useState(false);
 
-  // Compute all simulations for the report
-  const cpuResult: CpuSchedulingResult = simulateCpuScheduling(processes, 'FCFS');
-  const cpuAllAlgos: CpuAlgorithm[] = ['FCFS', 'SJF_NP', 'SRTF', 'PRIORITY_NP', 'PRIORITY_P', 'RR'];
-  const cpuComparisons = cpuAllAlgos.map((a) => ({
-    algo: a,
-    name: getCpuAlgorithmName(a),
-    result: simulateCpuScheduling(processes, a, 2),
-  }));
-  const bestCpu = [...cpuComparisons].sort((a, b) => a.result.avgWaitingTime - b.result.avgWaitingTime)[0];
-
-  const pageResult: PageReplacementResult = simulatePageReplacement(pageReferenceString, frameCount, 'FIFO');
-  const pageAllAlgos: PageAlgorithm[] = ['FIFO', 'LRU', 'OPT', 'LFU'];
-  const pageComparisons = pageAllAlgos.map((a) => ({
-    algo: a,
-    name: getPageAlgorithmName(a),
-    result: simulatePageReplacement(pageReferenceString, frameCount, a),
-  }));
-  const bestPage = [...pageComparisons].sort((a, b) => a.result.totalFaults - b.result.totalFaults)[0];
-
-  const diskResult: DiskSchedulingResult = simulateDiskScheduling(
-    diskRequests,
-    diskInitialHead,
-    diskMaxCylinder,
-    diskDirection,
-    'FCFS'
+  const cpuResult: CpuSchedulingResult = useMemo(
+    () => simulateCpuScheduling(processes, 'FCFS'),
+    [processes]
   );
-  const diskAllAlgos: DiskAlgorithm[] = ['FCFS', 'SSTF', 'SCAN', 'C-SCAN', 'LOOK', 'C-LOOK'];
-  const diskComparisons = diskAllAlgos.map((a) => ({
-    algo: a,
-    name: getDiskAlgorithmName(a),
-    result: simulateDiskScheduling(diskRequests, diskInitialHead, diskMaxCylinder, diskDirection, a),
-  }));
-  const bestDisk = [...diskComparisons].sort((a, b) => a.result.totalHeadMovement - b.result.totalHeadMovement)[0];
+  const cpuComparisons = useMemo(() => {
+    const algos: CpuAlgorithm[] = ['FCFS', 'SJF_NP', 'SRTF', 'PRIORITY_NP', 'PRIORITY_P', 'RR'];
+    return algos.map((algo) => ({
+      algo,
+      name: getCpuAlgorithmName(algo),
+      result: simulateCpuScheduling(processes, algo, roundRobinQuantum),
+    }));
+  }, [processes, roundRobinQuantum]);
+  const bestCpu = useMemo(
+    () => [...cpuComparisons].sort((a, b) => a.result.avgWaitingTime - b.result.avgWaitingTime)[0],
+    [cpuComparisons]
+  );
 
-  const bankersResult: BankersResult = runBankersSafety(bankersState);
+  const pageResult: PageReplacementResult = useMemo(
+    () => simulatePageReplacement(pageReferenceString, frameCount, 'FIFO'),
+    [pageReferenceString, frameCount]
+  );
+  const pageComparisons = useMemo(() => {
+    const algos: PageAlgorithm[] = ['FIFO', 'LRU', 'OPT', 'LFU'];
+    return algos.map((algo) => ({
+      algo,
+      name: getPageAlgorithmName(algo),
+      result: simulatePageReplacement(pageReferenceString, frameCount, algo),
+    }));
+  }, [pageReferenceString, frameCount]);
+  const bestPage = useMemo(
+    () => [...pageComparisons].sort((a, b) => a.result.totalFaults - b.result.totalFaults)[0],
+    [pageComparisons]
+  );
 
-  // Print handler
-  const handlePrint = () => {
-    window.print();
-  };
+  const diskResult: DiskSchedulingResult = useMemo(
+    () => simulateDiskScheduling(diskRequests, diskInitialHead, diskMaxCylinder, diskDirection, 'FCFS'),
+    [diskRequests, diskInitialHead, diskMaxCylinder, diskDirection]
+  );
+  const diskComparisons = useMemo(() => {
+    const algos: DiskAlgorithm[] = ['FCFS', 'SSTF', 'SCAN', 'C-SCAN', 'LOOK', 'C-LOOK'];
+    return algos.map((algo) => ({
+      algo,
+      name: getDiskAlgorithmName(algo),
+      result: simulateDiskScheduling(diskRequests, diskInitialHead, diskMaxCylinder, diskDirection, algo),
+    }));
+  }, [diskRequests, diskInitialHead, diskMaxCylinder, diskDirection]);
+  const bestDisk = useMemo(
+    () => [...diskComparisons].sort((a, b) => a.result.totalHeadMovement - b.result.totalHeadMovement)[0],
+    [diskComparisons]
+  );
 
-  // Generate full Markdown text
+  const bankersResult = useMemo(() => runBankersSafety(bankersState), [bankersState]);
+  const reportDate = formatDate(studentInfo.submissionDate);
+
   const generateMarkdownReport = (): string => {
+    const cpuRows = cpuComparisons
+      .map((item) => `| ${item.name} | ${item.result.avgWaitingTime} ms | ${item.result.avgTurnaroundTime} ms | ${item.result.cpuUtilization}% |`)
+      .join('\n');
+    const pageRows = pageComparisons
+      .map((item) => `| ${item.name} | ${item.result.totalFaults} | ${item.result.totalHits} | ${item.result.hitRatio}% |`)
+      .join('\n');
+    const diskRows = diskComparisons
+      .map((item) => `| ${item.name} | ${item.result.totalHeadMovement} | ${item.result.avgSeekLength} |`)
+      .join('\n');
+
     return `# ${studentInfo.projectTitle}
-**${studentInfo.collegeName}**
-**${studentInfo.department}**
 
----
-- **Student Name:** ${studentInfo.studentName}
-- **Roll / Registration No:** ${studentInfo.rollNumber}
-- **Course & Subject:** ${studentInfo.courseCode} - ${studentInfo.courseName}
-- **Academic Year:** ${studentInfo.academicYear}
-- **Faculty Guide / Mentor:** ${studentInfo.guideName}
-- **Date of Submission:** ${studentInfo.submissionDate}
----
+${studentInfo.studentName} · ${studentInfo.rollNumber}
+${studentInfo.department}, ${studentInfo.collegeName}
 
-## 1. ABSTRACT & PROJECT OBJECTIVES
-This mini project implements, benchmarks, and comparatively analyzes core Operating System kernel subsystems:
-1. **CPU Process Scheduling:** First-Come First-Served, Shortest Job First (Non-Preemptive & Preemptive/SRTF), Priority Scheduling, and Round Robin.
-2. **Virtual Memory Demand Paging:** FIFO, LRU, Optimal (Bélády's), and LFU page replacement algorithms.
-3. **Secondary Disk Head Scheduling:** FCFS, SSTF, SCAN, C-SCAN, LOOK, and C-LOOK seek trajectory minimization.
-4. **Deadlock Avoidance:** Dijkstra's Banker's Algorithm ensuring safety invariants and circular-wait prevention.
+- Course: ${studentInfo.courseCode} - ${studentInfo.courseName}
+- Academic year: ${studentInfo.academicYear}
+- Guide: ${studentInfo.guideName}
+- Submitted: ${reportDate}
 
----
+## 1. Abstract
 
-## 2. MODULE 1: CPU PROCESS SCHEDULING
-### 2.1 Theoretical Formulation
-- **Turnaround Time (TAT):** $TAT = Completion\\_Time - Arrival\\_Time$
-- **Waiting Time (WT):** $WT = Turnaround\\_Time - Burst\\_Time$
-- **Response Time (RT):** $RT = First\\_Execution\\_Start - Arrival\\_Time$
-- **CPU Utilization:** $(Busy\\_Time / Total\\_Time) \\times 100\\%$
+This report covers four classic operating system decisions: CPU scheduling, page replacement, disk scheduling and deadlock avoidance. Each section uses the workload entered in the simulator, compares the available policies, and records the result. The numbers below are generated from the current inputs, so they can be reproduced by opening the app again.
 
-### 2.2 Process Input Table
-| Process ID | Arrival Time (AT) | Burst Time (BT) | Priority |
+## 2. CPU scheduling
+
+Six policies are compared on ${processes.length} processes. Waiting time is the time a process spends ready but not running. Turnaround time is completion minus arrival.
+
+| Policy | Average waiting time | Average turnaround time | CPU utilisation |
+| :--- | ---: | ---: | ---: |
+${cpuRows}
+
+Lowest average waiting time: **${bestCpu.name}** (${bestCpu.result.avgWaitingTime} ms).
+
+Input workload:
+
+| Process | Arrival | Burst | Priority |
+| :--- | ---: | ---: | ---: |
+${processes.map((process) => `| ${process.id} | ${process.arrivalTime} | ${process.burstTime} | ${process.priority} |`).join('\n')}
+
+## 3. Page replacement
+
+Reference string: \`[${pageReferenceString.join(', ')}]\` with ${frameCount} physical frames. A fault means the page was not in memory and had to be loaded.
+
+| Policy | Page faults | Page hits | Hit rate |
+| :--- | ---: | ---: | ---: |
+${pageRows}
+
+Fewest faults: **${bestPage.name}** (${bestPage.result.totalFaults}). Optimal replacement is a theoretical lower bound because it uses future references.
+
+## 4. Disk scheduling
+
+Requests: \`[${diskRequests.join(', ')}]\`, starting at cylinder ${diskInitialHead}, disk range 0 to ${diskMaxCylinder}, direction ${diskDirection === 'right' ? 'towards the last cylinder' : 'towards cylinder 0'}.
+
+| Policy | Total head movement | Average seek |
+| :--- | ---: | ---: |
+${diskRows}
+
+Shortest path: **${bestDisk.name}** (${bestDisk.result.totalHeadMovement} cylinders).
+
+## 5. Deadlock avoidance
+
+The system has ${bankersState.processCount} processes and resource types ${bankersState.resourceNames.join(', ')}. Available vector: \`[${bankersState.available.join(', ')}]\`.
+
+- State: **${bankersResult.isSafe ? 'safe' : 'unsafe'}**
+- Safe order: ${bankersResult.isSafe ? bankersResult.safeSequence.join(' -> ') : 'No complete safe order exists.'}
+
+Allocation and need:
+
+| Process | Allocation | Max | Need |
 | :--- | :--- | :--- | :--- |
-${processes.map((p) => `| ${p.id} | ${p.arrivalTime} | ${p.burstTime} | ${p.priority} |`).join('\n')}
+${Array.from({ length: bankersState.processCount }, (_, index) =>
+  `| P${index} | [${(bankersState.allocation[index] ?? []).join(', ')}] | [${(bankersState.max[index] ?? []).join(', ')}] | [${(bankersResult.needMatrix[index] ?? []).join(', ')}] |`
+).join('\n')}
 
-### 2.3 Comparative Algorithm Benchmarking
-| Algorithm | Avg Waiting Time (ms) | Avg Turnaround Time (ms) | CPU Utilization (%) |
-| :--- | :--- | :--- | :--- |
-${cpuComparisons.map((c) => `| ${c.name} | ${c.result.avgWaitingTime} | ${c.result.avgTurnaroundTime} | ${c.result.cpuUtilization}% |`).join('\n')}
+## 6. Conclusion
 
-**Key Observation:** For this workload, **${bestCpu.name}** provided the minimum average waiting time of **${bestCpu.result.avgWaitingTime} ms**.
+- FCFS is easy to implement but a long job near the front can delay everything behind it. SJF and SRTF reduce average waiting time when burst times are known. Round robin gives up some throughput for predictable response time.
+- Optimal page replacement is a benchmark rather than a real policy. LRU is a practical approximation, and FIFO can occasionally produce more faults with more frames (Belady's anomaly).
+- SSTF shortens each seek but can starve far-away requests. SCAN and LOOK spread the arm movement more fairly.
+- Banker's algorithm prevents unsafe allocations as long as every process declares its maximum need honestly. An unsafe state is not a deadlock yet; it is a state that could become one.
 
+${studentInfo.additionalNotes ? `## Notes\n\n${studentInfo.additionalNotes}\n` : ''}
 ---
 
-## 3. MODULE 2: VIRTUAL MEMORY PAGE REPLACEMENT
-### 3.1 Input Configuration
-- **Reference String:** \`[${pageReferenceString.join(', ')}]\`
-- **Allocated Physical Frames:** ${frameCount}
-
-### 3.2 Comparative Performance
-| Algorithm | Page Faults (Misses) | Page Hits | Hit Ratio (%) | Fault Ratio (%) |
-| :--- | :--- | :--- | :--- | :--- |
-${pageComparisons.map((p) => `| ${p.name} | ${p.result.totalFaults} | ${p.result.totalHits} | ${p.result.hitRatio}% | ${p.result.faultRatio}% |`).join('\n')}
-
-**Key Observation:** **${bestPage.name}** achieved the lowest fault count of **${bestPage.result.totalFaults} faults** (${bestPage.result.hitRatio}% hit ratio).
-
----
-
-## 4. MODULE 3: DISK HEAD SCHEDULING
-### 4.1 Input Parameters
-- **Disk Request Queue:** \`[${diskRequests.join(', ')}]\`
-- **Initial Head Position:** Cylinder ${diskInitialHead}
-- **Disk Capacity:** Cylinders 0 to ${diskMaxCylinder}
-- **Arm Traversal Direction:** Towards cylinder ${diskDirection === 'right' ? diskMaxCylinder : 0}
-
-### 4.2 Comparative Seek Traversal
-| Algorithm | Total Head Movement (Cylinders) | Avg Seek Length (Cyl/Req) |
-| :--- | :--- | :--- |
-${diskComparisons.map((d) => `| ${d.name} | ${d.result.totalHeadMovement} | ${d.result.avgSeekLength} |`).join('\n')}
-
-**Key Observation:** **${bestDisk.name}** minimized mechanical arm wear with **${bestDisk.result.totalHeadMovement} cylinders** traversed.
-
----
-
-## 5. MODULE 4: DEADLOCK AVOIDANCE (BANKER'S ALGORITHM)
-### 5.1 System State
-- **Processes:** ${bankersState.processCount} (P0 to P${bankersState.processCount - 1})
-- **Resources:** ${bankersState.resourceNames.join(', ')}
-- **Available Vector:** \`[${bankersState.available.join(', ')}]\`
-
-### 5.2 Verification Result
-- **System Safe Invariant:** ${bankersResult.isSafe ? 'YES - SAFE STATE' : 'NO - DEADLOCK / UNSAFE STATE'}
-- **Safe Execution Sequence:** ${bankersResult.isSafe ? `< ${bankersResult.safeSequence.join(' -> ')} >` : 'None (System in deadlock)'}
-
----
-
-## 6. CONCLUSION & LEARNING OUTCOMES
-1. Preemptive scheduling algorithms like SRTF consistently lower waiting times for heterogeneous burst sets compared to FCFS.
-2. Optimal Page Replacement establishes the theoretical minimum page fault baseline, while LRU serves as the most viable practical approximation.
-3. Disk scheduling algorithms such as LOOK and SSTF dramatically reduce mechanical seek delays over FCFS.
-4. Banker's Algorithm dynamically avoids deadlocks by ensuring that every tentative allocation maintains at least one valid path where all processes can execute to completion.
-
----
-**Student Signature:** ___________________________  
-**Faculty / Examiner Signature:** ___________________________  
+Submitted by: ${studentInfo.studentName} (${studentInfo.rollNumber})
+Guide: ${studentInfo.guideName}
+Date: ${reportDate}
 `;
   };
 
-  const handleCopyMarkdown = () => {
-    navigator.clipboard.writeText(generateMarkdownReport());
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const handleCopyMarkdown = async () => {
+    try {
+      await navigator.clipboard.writeText(generateMarkdownReport());
+      setCopyState('copied');
+      onNotify('Report copied as Markdown.');
+    } catch {
+      setCopyState('error');
+      onNotify('The browser blocked clipboard access. Use Download Markdown instead.');
+    }
+    window.setTimeout(() => setCopyState('idle'), 2500);
   };
 
-  const handleDownloadMarkdown = () => {
-    const text = generateMarkdownReport();
-    const blob = new Blob([text], { type: 'text/markdown;charset=utf-8' });
+  const downloadFile = (contents: string, type: string, filename: string) => {
+    const blob = new Blob([contents], { type });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `OS_Mini_Project_Report_${studentInfo.rollNumber || 'CS'}.md`;
+    link.download = filename;
     link.click();
-    URL.revokeObjectURL(url);
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
-  const handleDownloadJSON = () => {
+  const handleDownloadMarkdown = () => {
+    downloadFile(
+      generateMarkdownReport(),
+      'text/markdown;charset=utf-8',
+      `os-lab-report-${safeFilename(studentInfo.rollNumber)}.md`
+    );
+    onNotify('Markdown report downloaded.');
+  };
+
+  const handleDownloadJson = () => {
     const data = {
       metadata: studentInfo,
       cpu: { processes, comparisons: cpuComparisons },
       pageReplacement: { referenceString: pageReferenceString, frameCount, comparisons: pageComparisons },
-      disk: { requests: diskRequests, initialHead: diskInitialHead, maxCylinder: diskMaxCylinder, comparisons: diskComparisons },
+      disk: {
+        requests: diskRequests,
+        initialHead: diskInitialHead,
+        maxCylinder: diskMaxCylinder,
+        direction: diskDirection,
+        comparisons: diskComparisons,
+      },
       bankers: { state: bankersState, result: bankersResult },
     };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `OS_Mini_Project_Data_${studentInfo.rollNumber || 'CS'}.json`;
-    link.click();
-    URL.revokeObjectURL(url);
+
+    downloadFile(
+      JSON.stringify(data, null, 2),
+      'application/json',
+      `os-lab-data-${safeFilename(studentInfo.rollNumber)}.json`
+    );
+    onNotify('Raw results downloaded as JSON.');
   };
 
   return (
     <div className="space-y-6">
-      {/* Top Action Bar (Hidden during print) */}
-      <div className="no-print bg-slate-900 border border-slate-800 rounded-lg p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <h2 className="text-lg font-bold text-slate-100 flex items-center gap-2">
-            <FileText className="w-5 h-5 text-indigo-400" />
-            Academic Lab Mini-Project Report
-          </h2>
-          <p className="text-xs text-slate-400">
-            Formatted to university submission standards with mathematical proofs, Gantt records, and comparison tables.
-          </p>
-        </div>
+      <div className="no-print rounded-lg border border-slate-800 bg-slate-900 p-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="text-xs font-medium text-indigo-400">Report</p>
+            <h1 className="mt-1 flex items-center gap-2 text-xl font-semibold text-slate-100">
+              <FileText className="h-5 w-5 text-indigo-400" aria-hidden="true" />
+              Project report
+            </h1>
+            <p className="mt-1 text-sm text-slate-400">
+              Built from the inputs currently loaded in the four simulators. Add your details, then print or export.
+            </p>
+          </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            onClick={() => setIsEditingInfo(!isEditingInfo)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-md text-xs font-medium transition-colors"
-          >
-            <Edit3 className="w-3.5 h-3.5 text-indigo-400" />
-            {isEditingInfo ? 'Close Editor' : 'Edit Student Details'}
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setIsEditingInfo((value) => !value)}
+              aria-expanded={isEditingInfo}
+              className="flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-200 transition-colors hover:bg-slate-700"
+            >
+              <Edit3 className="h-3.5 w-3.5 text-indigo-400" aria-hidden="true" />
+              {isEditingInfo ? 'Close details' : 'Edit details'}
+            </button>
 
-          <button
-            onClick={handleCopyMarkdown}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-md text-xs font-medium transition-colors"
-          >
-            {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-slate-400" />}
-            {copied ? 'Copied MD' : 'Copy MD'}
-          </button>
+            <button
+              type="button"
+              onClick={handleCopyMarkdown}
+              className="flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-200 transition-colors hover:bg-slate-700"
+            >
+              {copyState === 'copied' ? (
+                <Check className="h-3.5 w-3.5 text-emerald-400" aria-hidden="true" />
+              ) : (
+                <Copy className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
+              )}
+              {copyState === 'copied' ? 'Copied' : copyState === 'error' ? 'Copy failed' : 'Copy Markdown'}
+            </button>
 
-          <button
-            onClick={handleDownloadMarkdown}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-md text-xs font-medium transition-colors"
-          >
-            <Download className="w-3.5 h-3.5 text-slate-400" />
-            .md Report
-          </button>
+            <button
+              type="button"
+              onClick={handleDownloadMarkdown}
+              className="flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-200 transition-colors hover:bg-slate-700"
+            >
+              <Download className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
+              Markdown
+            </button>
 
-          <button
-            onClick={handleDownloadJSON}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-md text-xs font-medium transition-colors"
-          >
-            <Download className="w-3.5 h-3.5 text-slate-400" />
-            JSON
-          </button>
+            <button
+              type="button"
+              onClick={handleDownloadJson}
+              className="flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-200 transition-colors hover:bg-slate-700"
+            >
+              <Download className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
+              JSON
+            </button>
 
-          <button
-            onClick={handlePrint}
-            className="flex items-center gap-1.5 px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-md text-xs font-bold transition-colors shadow-sm"
-          >
-            <Printer className="w-4 h-4" />
-            Print / Export PDF
-          </button>
+            <button
+              type="button"
+              onClick={() => window.print()}
+              className="flex items-center gap-1.5 rounded-md bg-indigo-600 px-4 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-indigo-500"
+            >
+              <Printer className="h-4 w-4" aria-hidden="true" />
+              Print / PDF
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Student & Project Metadata Editor (Collapsible) */}
       {isEditingInfo && (
-        <div className="no-print bg-slate-900 border border-indigo-500/30 rounded-lg p-5 space-y-4">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-indigo-400">
-            Student & Institution Submission Details
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
-            <div>
-              <label className="text-slate-400 block mb-1">Project Title</label>
-              <input
-                type="text"
-                value={studentInfo.projectTitle}
-                onChange={(e) => onUpdateStudentInfo({ ...studentInfo, projectTitle: e.target.value })}
-                className="w-full px-2.5 py-1.5 bg-slate-950 border border-slate-700 rounded text-slate-100"
-              />
-            </div>
-            <div>
-              <label className="text-slate-400 block mb-1">Student Name</label>
-              <input
-                type="text"
-                value={studentInfo.studentName}
-                onChange={(e) => onUpdateStudentInfo({ ...studentInfo, studentName: e.target.value })}
-                className="w-full px-2.5 py-1.5 bg-slate-950 border border-slate-700 rounded text-slate-100"
-              />
-            </div>
-            <div>
-              <label className="text-slate-400 block mb-1">Roll / PRN Number</label>
-              <input
-                type="text"
-                value={studentInfo.rollNumber}
-                onChange={(e) => onUpdateStudentInfo({ ...studentInfo, rollNumber: e.target.value })}
-                className="w-full px-2.5 py-1.5 bg-slate-950 border border-slate-700 rounded text-slate-100"
-              />
-            </div>
-            <div>
-              <label className="text-slate-400 block mb-1">Department</label>
-              <input
-                type="text"
-                value={studentInfo.department}
-                onChange={(e) => onUpdateStudentInfo({ ...studentInfo, department: e.target.value })}
-                className="w-full px-2.5 py-1.5 bg-slate-950 border border-slate-700 rounded text-slate-100"
-              />
-            </div>
-            <div>
-              <label className="text-slate-400 block mb-1">College / University</label>
-              <input
-                type="text"
-                value={studentInfo.collegeName}
-                onChange={(e) => onUpdateStudentInfo({ ...studentInfo, collegeName: e.target.value })}
-                className="w-full px-2.5 py-1.5 bg-slate-950 border border-slate-700 rounded text-slate-100"
-              />
-            </div>
-            <div>
-              <label className="text-slate-400 block mb-1">Course Code & Subject</label>
-              <input
-                type="text"
-                value={studentInfo.courseCode + ' - ' + studentInfo.courseName}
-                onChange={(e) => onUpdateStudentInfo({ ...studentInfo, courseName: e.target.value })}
-                className="w-full px-2.5 py-1.5 bg-slate-950 border border-slate-700 rounded text-slate-100"
-              />
-            </div>
-            <div>
-              <label className="text-slate-400 block mb-1">Faculty Guide / Mentor</label>
-              <input
-                type="text"
-                value={studentInfo.guideName}
-                onChange={(e) => onUpdateStudentInfo({ ...studentInfo, guideName: e.target.value })}
-                className="w-full px-2.5 py-1.5 bg-slate-950 border border-slate-700 rounded text-slate-100"
-              />
-            </div>
-            <div>
-              <label className="text-slate-400 block mb-1">Academic Year</label>
-              <input
-                type="text"
-                value={studentInfo.academicYear}
-                onChange={(e) => onUpdateStudentInfo({ ...studentInfo, academicYear: e.target.value })}
-                className="w-full px-2.5 py-1.5 bg-slate-950 border border-slate-700 rounded text-slate-100"
-              />
-            </div>
-            <div>
-              <label className="text-slate-400 block mb-1">Date of Submission</label>
-              <input
-                type="date"
-                value={studentInfo.submissionDate}
-                onChange={(e) => onUpdateStudentInfo({ ...studentInfo, submissionDate: e.target.value })}
-                className="w-full px-2.5 py-1.5 bg-slate-950 border border-slate-700 rounded text-slate-100"
-              />
-            </div>
+        <section className="no-print space-y-4 rounded-lg border border-indigo-500/30 bg-slate-900 p-5">
+          <div>
+            <h2 className="text-sm font-semibold text-indigo-300">Cover details</h2>
+            <p className="mt-0.5 text-xs text-slate-500">
+              These values only change the report. They are saved in this browser.
+            </p>
           </div>
-        </div>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <Field
+              label="Project title"
+              value={studentInfo.projectTitle}
+              onChange={(value) => onUpdateStudentInfo({ ...studentInfo, projectTitle: value })}
+              wide
+            />
+            <Field
+              label="Student name"
+              value={studentInfo.studentName}
+              onChange={(value) => onUpdateStudentInfo({ ...studentInfo, studentName: value })}
+            />
+            <Field
+              label="Roll / PRN"
+              value={studentInfo.rollNumber}
+              placeholder="e.g. 12345"
+              onChange={(value) => onUpdateStudentInfo({ ...studentInfo, rollNumber: value })}
+            />
+            <Field
+              label="Department"
+              value={studentInfo.department}
+              onChange={(value) => onUpdateStudentInfo({ ...studentInfo, department: value })}
+            />
+            <Field
+              label="College / university"
+              value={studentInfo.collegeName}
+              onChange={(value) => onUpdateStudentInfo({ ...studentInfo, collegeName: value })}
+              wide
+            />
+            <Field
+              label="Course code"
+              value={studentInfo.courseCode}
+              onChange={(value) => onUpdateStudentInfo({ ...studentInfo, courseCode: value })}
+            />
+            <Field
+              label="Course name"
+              value={studentInfo.courseName}
+              onChange={(value) => onUpdateStudentInfo({ ...studentInfo, courseName: value })}
+            />
+            <Field
+              label="Academic year"
+              value={studentInfo.academicYear}
+              onChange={(value) => onUpdateStudentInfo({ ...studentInfo, academicYear: value })}
+            />
+            <Field
+              label="Guide / faculty"
+              value={studentInfo.guideName}
+              onChange={(value) => onUpdateStudentInfo({ ...studentInfo, guideName: value })}
+            />
+            <Field
+              label="Submission date"
+              type="date"
+              value={studentInfo.submissionDate}
+              onChange={(value) => onUpdateStudentInfo({ ...studentInfo, submissionDate: value })}
+            />
+          </div>
+
+          <label>
+            <span className="mb-1 block text-xs text-slate-400">Additional notes (optional)</span>
+            <textarea
+              rows={3}
+              value={studentInfo.additionalNotes}
+              onChange={(event) => onUpdateStudentInfo({ ...studentInfo, additionalNotes: event.target.value })}
+              className="w-full rounded border border-slate-700 bg-slate-950 px-2.5 py-1.5 text-xs leading-relaxed text-slate-100 focus:border-indigo-500 focus:outline-none"
+            />
+          </label>
+        </section>
       )}
 
-      {/* ACADEMIC REPORT PAPER CONTAINER (Formatted for Print and Screen) */}
-      <div className="bg-slate-900 print:bg-white border border-slate-800 print:border-none rounded-xl p-6 sm:p-10 text-slate-200 print:text-slate-900 shadow-xl space-y-8 max-w-5xl mx-auto print-card">
-        {/* Cover / Academic Header */}
-        <div className="border-b-2 border-slate-700 print:border-slate-800 pb-6 text-center space-y-2">
-          <div className="flex items-center justify-center gap-2 text-indigo-400 print:text-indigo-900 font-bold uppercase tracking-wider text-xs">
-            <GraduationCap className="w-5 h-5 inline-block" />
-            <span>Academic Mini Project Report · Operating Systems Laboratory</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-100 print:text-black tracking-tight max-w-3xl mx-auto">
+      <article className="print-card mx-auto max-w-5xl space-y-8 rounded-xl border border-slate-800 bg-slate-900 p-6 text-slate-200 shadow-xl sm:p-10 print:text-slate-900">
+        <header className="space-y-3 border-b-2 border-slate-700 pb-6 text-center print:border-slate-800">
+          <p className="text-xs font-semibold uppercase tracking-wider text-indigo-400 print:text-indigo-900">
+            Operating Systems Laboratory · Mini Project
+          </p>
+          <h2 className="mx-auto max-w-3xl text-2xl font-bold tracking-tight text-slate-100 print:text-black sm:text-3xl">
             {studentInfo.projectTitle}
-          </h1>
-          <div className="text-sm font-semibold text-slate-300 print:text-slate-800">
-            {studentInfo.department} · {studentInfo.collegeName}
-          </div>
-
-          {/* Student & Course Metadata Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-left text-xs bg-slate-950/70 print:bg-slate-50 p-4 rounded-lg border border-slate-800 print:border-slate-300 mt-4 font-mono">
-            <div>
-              <span className="text-slate-400 print:text-slate-600 block text-[11px] font-sans">Student Name:</span>
-              <strong className="text-slate-100 print:text-slate-900">{studentInfo.studentName}</strong>
-            </div>
-            <div>
-              <span className="text-slate-400 print:text-slate-600 block text-[11px] font-sans">Roll / PRN:</span>
-              <strong className="text-slate-100 print:text-slate-900">{studentInfo.rollNumber}</strong>
-            </div>
-            <div>
-              <span className="text-slate-400 print:text-slate-600 block text-[11px] font-sans">Course:</span>
-              <strong className="text-slate-100 print:text-slate-900">{studentInfo.courseCode}</strong>
-            </div>
-            <div>
-              <span className="text-slate-400 print:text-slate-600 block text-[11px] font-sans">Submission Date:</span>
-              <strong className="text-slate-100 print:text-slate-900">{studentInfo.submissionDate}</strong>
-            </div>
-          </div>
-        </div>
-
-        {/* Abstract & Objectives */}
-        <section className="space-y-3 avoid-break">
-          <h2 className="text-base font-bold uppercase tracking-wider text-indigo-400 print:text-indigo-900 border-b border-slate-800 print:border-slate-300 pb-1">
-            1. Abstract & Objectives
           </h2>
+          <p className="text-sm text-slate-300 print:text-slate-800">
+            {studentInfo.department}, {studentInfo.collegeName}
+          </p>
+
+          <dl className="mt-4 grid grid-cols-2 gap-3 rounded-lg border border-slate-800 bg-slate-950/70 p-4 text-left text-xs print:border-slate-300 print:bg-slate-50 sm:grid-cols-4">
+            <div>
+              <dt className="text-[11px] text-slate-400 print:text-slate-600">Student</dt>
+              <dd className="mt-0.5 font-semibold text-slate-100 print:text-slate-900">{studentInfo.studentName}</dd>
+            </div>
+            <div>
+              <dt className="text-[11px] text-slate-400 print:text-slate-600">Roll / PRN</dt>
+              <dd className="mt-0.5 font-semibold text-slate-100 print:text-slate-900">{studentInfo.rollNumber}</dd>
+            </div>
+            <div>
+              <dt className="text-[11px] text-slate-400 print:text-slate-600">Course</dt>
+              <dd className="mt-0.5 font-semibold text-slate-100 print:text-slate-900">
+                {studentInfo.courseCode} · {studentInfo.courseName}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-[11px] text-slate-400 print:text-slate-600">Submitted</dt>
+              <dd className="mt-0.5 font-semibold text-slate-100 print:text-slate-900">{reportDate}</dd>
+            </div>
+            <div>
+              <dt className="text-[11px] text-slate-400 print:text-slate-600">Guide</dt>
+              <dd className="mt-0.5 font-semibold text-slate-100 print:text-slate-900">{studentInfo.guideName}</dd>
+            </div>
+            <div>
+              <dt className="text-[11px] text-slate-400 print:text-slate-600">Academic year</dt>
+              <dd className="mt-0.5 font-semibold text-slate-100 print:text-slate-900">{studentInfo.academicYear}</dd>
+            </div>
+          </dl>
+        </header>
+
+        <section className="space-y-3 avoid-break">
+          <h3 className="border-b border-slate-800 pb-1 text-base font-semibold text-indigo-400 print:border-slate-300 print:text-indigo-900">
+            1. Abstract
+          </h3>
           <p className="text-xs leading-relaxed text-slate-300 print:text-slate-800">
-            Modern multiprogramming Operating Systems face critical optimization challenges: allocating CPU burst periods, mitigating virtual memory thrashing, minimizing secondary storage mechanical arm seek latencies, and avoiding system-wide resource deadlocks. This laboratory project constructs complete simulators for CPU Scheduling, Page Replacement, Disk Head Scheduling, and Dijkstra's Banker's Algorithm. Real-world benchmark workloads are simulated to verify theoretical guarantees against empirical execution metrics.
+            This report covers four classic operating system decisions: CPU scheduling, page replacement,
+            disk scheduling and deadlock avoidance. Each section uses the workload entered in the simulator,
+            compares the available policies, and records the result. The numbers below are generated from the
+            current inputs, so they can be reproduced by opening the app again.
           </p>
+          {studentInfo.additionalNotes && (
+            <p className="rounded border border-slate-800 bg-slate-950/60 p-3 text-xs leading-relaxed text-slate-300 print:border-slate-300 print:bg-slate-50 print:text-slate-800">
+              {studentInfo.additionalNotes}
+            </p>
+          )}
         </section>
 
-        {/* SECTION 2: CPU SCHEDULING */}
         <section className="space-y-4 avoid-break">
-          <div className="flex items-center justify-between border-b border-slate-800 print:border-slate-300 pb-1">
-            <h2 className="text-base font-bold uppercase tracking-wider text-indigo-400 print:text-indigo-900 flex items-center gap-2">
-              <Cpu className="w-4 h-4" />
-              2. Module 1: CPU Process Scheduling
-            </h2>
-            <span className="text-xs font-mono text-emerald-400 print:text-emerald-800">
-              Optimal WT: {bestCpu.name} ({bestCpu.result.avgWaitingTime} ms)
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-1 print:border-slate-300">
+            <h3 className="flex items-center gap-2 text-base font-semibold text-indigo-400 print:text-indigo-900">
+              <Cpu className="h-4 w-4" aria-hidden="true" />
+              2. CPU scheduling
+            </h3>
+            <span className="font-mono text-xs text-emerald-400 print:text-emerald-800">
+              Lowest average waiting time: {bestCpu.name} ({bestCpu.result.avgWaitingTime} ms)
             </span>
           </div>
 
-          <div className="text-xs text-slate-300 print:text-slate-800 space-y-1">
-            <p>
-              <strong>Mathematical Formulations:</strong> Turnaround Time: TAT = CT - AT, Waiting Time: WT = TAT - BT, CPU Utilization: (Busy Time / Total Time) × 100%.
-            </p>
-          </div>
+          <p className="text-xs leading-relaxed text-slate-300 print:text-slate-800">
+            Waiting time is the time a process spends ready but not running (TAT − burst). Turnaround time is
+            completion minus arrival (CT − AT). Lower is better for both.
+          </p>
 
-          {/* Process Input Table */}
           <div>
-            <span className="text-xs font-bold text-slate-300 print:text-slate-800 block mb-1">
-              Table 2.1: Process Workload Input
-            </span>
-            <table className="w-full text-left border-collapse text-xs font-mono border border-slate-800 print:border-slate-400">
+            <p className="mb-1 text-xs font-semibold text-slate-300 print:text-slate-800">
+              Table 2.1: Process workload
+            </p>
+            <table className="w-full border-collapse border border-slate-800 text-left text-xs font-mono print:border-slate-400">
               <thead>
-                <tr className="bg-slate-950 print:bg-slate-100 border-b border-slate-800 print:border-slate-400">
-                  <th className="py-1.5 px-3">Process ID</th>
-                  <th className="py-1.5 px-3">Arrival Time (AT)</th>
-                  <th className="py-1.5 px-3">Burst Time (BT)</th>
-                  <th className="py-1.5 px-3">Priority</th>
+                <tr className="border-b border-slate-800 bg-slate-950 print:border-slate-400 print:bg-slate-100">
+                  <th scope="col" className="px-3 py-1.5 font-medium">Process</th>
+                  <th scope="col" className="px-3 py-1.5 font-medium">Arrival</th>
+                  <th scope="col" className="px-3 py-1.5 font-medium">Burst</th>
+                  <th scope="col" className="px-3 py-1.5 font-medium">Priority</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-850 print:divide-slate-300">
-                {processes.map((p) => (
-                  <tr key={p.id}>
-                    <td className="py-1 px-3 font-bold">{p.id}</td>
-                    <td className="py-1 px-3">{p.arrivalTime} ms</td>
-                    <td className="py-1 px-3">{p.burstTime} ms</td>
-                    <td className="py-1 px-3">{p.priority}</td>
+              <tbody className="divide-y divide-slate-800 print:divide-slate-300">
+                {processes.map((process) => (
+                  <tr key={process.id}>
+                    <td className="px-3 py-1 font-semibold">{process.id}</td>
+                    <td className="px-3 py-1">{process.arrivalTime} ms</td>
+                    <td className="px-3 py-1">{process.burstTime} ms</td>
+                    <td className="px-3 py-1">{process.priority}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
 
-          {/* FCFS Gantt Representation */}
           <div>
-            <span className="text-xs font-bold text-slate-300 print:text-slate-800 block mb-1">
-              Figure 2.1: Execution Gantt Timeline (Total Schedule Duration: {cpuResult.totalTime} ms)
-            </span>
-            <div className="flex w-full h-8 rounded border border-slate-700 print:border-black overflow-hidden font-mono text-xs">
-              {cpuResult.ganttChart.map((seg, idx) => (
+            <p className="mb-1 text-xs font-semibold text-slate-300 print:text-slate-800">
+              Figure 2.1: FCFS timeline ({cpuResult.totalTime} ms)
+            </p>
+            <div className="flex h-8 w-full overflow-hidden rounded border border-slate-700 font-mono text-xs print:border-black">
+              {cpuResult.ganttChart.map((segment, index) => (
                 <div
-                  key={idx}
-                  style={{ width: `${(seg.duration / cpuResult.totalTime) * 100}%` }}
-                  className={`h-full flex items-center justify-center border-r border-slate-900 print:border-black ${
-                    seg.processId === 'IDLE'
-                      ? 'bg-slate-800 print:bg-slate-300 text-slate-400 print:text-slate-700'
-                      : 'bg-indigo-600 print:bg-slate-200 text-white print:text-black font-bold'
+                  key={index}
+                  style={{
+                    flexGrow: Math.max(segment.duration, 0.25),
+                    flexBasis: 0,
+                    minWidth: 14,
+                  }}
+                  className={`flex h-full items-center justify-center border-r border-slate-900 print:border-black ${
+                    segment.processId === 'IDLE'
+                      ? 'bg-slate-800 text-slate-400 print:bg-slate-300 print:text-slate-700'
+                      : 'bg-indigo-600 font-semibold text-white print:bg-slate-200 print:text-black'
                   }`}
+                  title={`${segment.processId}: ${segment.startTime} to ${segment.endTime} ms`}
                 >
-                  <span className="truncate">{seg.processId}</span>
+                  <span className="truncate px-1">{segment.processId === 'IDLE' ? 'idle' : segment.processId}</span>
                 </div>
               ))}
             </div>
-            <div className="flex justify-between text-[10px] font-mono text-slate-400 print:text-slate-600 mt-1">
+            <div className="mt-1 flex justify-between font-mono text-[10px] text-slate-400 print:text-slate-600">
               <span>0</span>
-              {cpuResult.ganttChart.map((s, idx) => (
-                <span key={idx}>{s.endTime}</span>
-              ))}
+              <span>{cpuResult.totalTime} ms</span>
             </div>
           </div>
 
-          {/* Comparative Table */}
           <div>
-            <span className="text-xs font-bold text-slate-300 print:text-slate-800 block mb-1">
-              Table 2.2: Benchmark Matrix Across All 6 Schedulers
-            </span>
-            <table className="w-full text-left border-collapse text-xs font-mono border border-slate-800 print:border-slate-400">
-              <thead>
-                <tr className="bg-slate-950 print:bg-slate-100 border-b border-slate-800 print:border-slate-400">
-                  <th className="py-1.5 px-3">Scheduling Policy</th>
-                  <th className="py-1.5 px-3">Avg Waiting Time</th>
-                  <th className="py-1.5 px-3">Avg Turnaround Time</th>
-                  <th className="py-1.5 px-3">CPU Utilization</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-850 print:divide-slate-300">
-                {cpuComparisons.map((c) => (
-                  <tr key={c.algo} className={c.algo === bestCpu.algo ? 'bg-indigo-950/20 print:bg-slate-200 font-bold' : ''}>
-                    <td className="py-1.5 px-3">{c.name}</td>
-                    <td className="py-1.5 px-3 text-indigo-400 print:text-indigo-900">{c.result.avgWaitingTime} ms</td>
-                    <td className="py-1.5 px-3 text-emerald-400 print:text-emerald-900">{c.result.avgTurnaroundTime} ms</td>
-                    <td className="py-1.5 px-3">{c.result.cpuUtilization}%</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        {/* SECTION 3: VIRTUAL MEMORY PAGE REPLACEMENT */}
-        <section className="space-y-4 avoid-break page-break">
-          <div className="flex items-center justify-between border-b border-slate-800 print:border-slate-300 pb-1">
-            <h2 className="text-base font-bold uppercase tracking-wider text-indigo-400 print:text-indigo-900 flex items-center gap-2">
-              <Layers className="w-4 h-4" />
-              3. Module 2: Page Replacement Simulation
-            </h2>
-            <span className="text-xs font-mono text-emerald-400 print:text-emerald-800">
-              Minimum Faults: {bestPage.name} ({bestPage.result.totalFaults} Faults)
-            </span>
-          </div>
-
-          <p className="text-xs text-slate-300 print:text-slate-800">
-            <strong>Input Reference Sequence:</strong> [{pageReferenceString.join(', ')}] with <strong>{frameCount} physical frames</strong>.
-          </p>
-
-          {/* Comparative Page Table */}
-          <div>
-            <span className="text-xs font-bold text-slate-300 print:text-slate-800 block mb-1">
-              Table 3.1: Page Replacement Comparative Efficiency
-            </span>
-            <table className="w-full text-left border-collapse text-xs font-mono border border-slate-800 print:border-slate-400">
-              <thead>
-                <tr className="bg-slate-950 print:bg-slate-100 border-b border-slate-800 print:border-slate-400">
-                  <th className="py-1.5 px-3">Replacement Algorithm</th>
-                  <th className="py-1.5 px-3">Page Faults (Misses)</th>
-                  <th className="py-1.5 px-3">Page Hits</th>
-                  <th className="py-1.5 px-3">Hit Ratio (%)</th>
-                  <th className="py-1.5 px-3">Fault Ratio (%)</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-850 print:divide-slate-300">
-                {pageComparisons.map((p) => (
-                  <tr key={p.algo} className={p.algo === bestPage.algo ? 'bg-indigo-950/20 print:bg-slate-200 font-bold' : ''}>
-                    <td className="py-1.5 px-3">{p.name}</td>
-                    <td className="py-1.5 px-3 text-rose-400 print:text-rose-800">{p.result.totalFaults}</td>
-                    <td className="py-1.5 px-3 text-emerald-400 print:text-emerald-800">{p.result.totalHits}</td>
-                    <td className="py-1.5 px-3">{p.result.hitRatio}%</td>
-                    <td className="py-1.5 px-3">{p.result.faultRatio}%</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        {/* SECTION 4: DISK SCHEDULING */}
-        <section className="space-y-4 avoid-break">
-          <div className="flex items-center justify-between border-b border-slate-800 print:border-slate-300 pb-1">
-            <h2 className="text-base font-bold uppercase tracking-wider text-indigo-400 print:text-indigo-900 flex items-center gap-2">
-              <HardDrive className="w-4 h-4" />
-              4. Module 3: Secondary Disk Scheduling
-            </h2>
-            <span className="text-xs font-mono text-emerald-400 print:text-emerald-800">
-              Minimal Seek: {bestDisk.name} ({bestDisk.result.totalHeadMovement} Cylinders)
-            </span>
-          </div>
-
-          <p className="text-xs text-slate-300 print:text-slate-800">
-            <strong>Parameters:</strong> Request Queue = [{diskRequests.join(', ')}], Head Start = {diskInitialHead}, Boundary = 0 to {diskMaxCylinder}, Direction = {diskDirection}.
-          </p>
-
-          {/* Disk Comparative Table */}
-          <div>
-            <span className="text-xs font-bold text-slate-300 print:text-slate-800 block mb-1">
-              Table 4.1: Disk Head Arm Traversal Comparison
-            </span>
-            <table className="w-full text-left border-collapse text-xs font-mono border border-slate-800 print:border-slate-400">
-              <thead>
-                <tr className="bg-slate-950 print:bg-slate-100 border-b border-slate-800 print:border-slate-400">
-                  <th className="py-1.5 px-3">Disk Policy</th>
-                  <th className="py-1.5 px-3">Total Head Movement (Cylinders)</th>
-                  <th className="py-1.5 px-3">Average Seek Length</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-850 print:divide-slate-300">
-                {diskComparisons.map((d) => (
-                  <tr key={d.algo} className={d.algo === bestDisk.algo ? 'bg-indigo-950/20 print:bg-slate-200 font-bold' : ''}>
-                    <td className="py-1.5 px-3">{d.name}</td>
-                    <td className="py-1.5 px-3 font-bold text-indigo-400 print:text-indigo-900">{d.result.totalHeadMovement} cyl</td>
-                    <td className="py-1.5 px-3">{d.result.avgSeekLength} cyl/req</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        {/* SECTION 5: DEADLOCK AVOIDANCE (BANKER'S ALGORITHM) */}
-        <section className="space-y-4 avoid-break">
-          <div className="flex items-center justify-between border-b border-slate-800 print:border-slate-300 pb-1">
-            <h2 className="text-base font-bold uppercase tracking-wider text-indigo-400 print:text-indigo-900 flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4" />
-              5. Module 4: Deadlock Avoidance (Banker’s Algorithm)
-            </h2>
-            <span
-              className={`text-xs font-mono font-bold ${
-                bankersResult.isSafe ? 'text-emerald-400 print:text-emerald-800' : 'text-rose-400 print:text-rose-800'
-              }`}
-            >
-              {bankersResult.isSafe ? 'SAFE SYSTEM INVARIANT' : 'UNSAFE / DEADLOCK'}
-            </span>
-          </div>
-
-          <div className="text-xs text-slate-300 print:text-slate-800 space-y-2">
-            <p>
-              <strong>Initial Available Vector:</strong> [{bankersState.available.join(', ')}] for Resource Types [{bankersState.resourceNames.join(', ')}].
+            <p className="mb-1 text-xs font-semibold text-slate-300 print:text-slate-800">
+              Table 2.2: Policy comparison
             </p>
-            {bankersResult.isSafe ? (
-              <p className="bg-emerald-950/30 print:bg-slate-100 p-2.5 rounded border border-emerald-800/40 print:border-slate-300 font-mono">
-                <strong>Verified Safe Execution Sequence:</strong> &lt; {bankersResult.safeSequence.join(' → ')} &gt;
-              </p>
-            ) : (
-              <p className="bg-rose-950/30 print:bg-slate-100 p-2.5 rounded border border-rose-800/40 print:border-slate-300 font-mono text-rose-300 print:text-rose-800">
-                Warning: No safe sequence exists. A circular wait deadlock is unavoidable under current allocations.
-              </p>
-            )}
-          </div>
-
-          {/* Allocation & Need Matrix Summary */}
-          <div>
-            <span className="text-xs font-bold text-slate-300 print:text-slate-800 block mb-1">
-              Table 5.1: Process Resource Allocation & Computed Need Matrix ($Need = Max - Allocation$)
-            </span>
-            <table className="w-full text-center border-collapse text-xs font-mono border border-slate-800 print:border-slate-400">
+            <table className="w-full border-collapse border border-slate-800 text-left text-xs font-mono print:border-slate-400">
               <thead>
-                <tr className="bg-slate-950 print:bg-slate-100 border-b border-slate-800 print:border-slate-400">
-                  <th className="py-1.5 px-3 text-left">Process</th>
-                  <th className="py-1.5 px-3">Allocation [A, B, C]</th>
-                  <th className="py-1.5 px-3">Max Demand [A, B, C]</th>
-                  <th className="py-1.5 px-3 font-bold text-indigo-400 print:text-indigo-900">Need [A, B, C]</th>
+                <tr className="border-b border-slate-800 bg-slate-950 print:border-slate-400 print:bg-slate-100">
+                  <th scope="col" className="px-3 py-1.5 font-medium">Policy</th>
+                  <th scope="col" className="px-3 py-1.5 font-medium">Average waiting</th>
+                  <th scope="col" className="px-3 py-1.5 font-medium">Average turnaround</th>
+                  <th scope="col" className="px-3 py-1.5 font-medium">CPU utilisation</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-850 print:divide-slate-300">
-                {Array.from({ length: bankersState.processCount }).map((_, pIdx) => (
-                  <tr key={pIdx}>
-                    <td className="py-1 px-3 text-left font-bold">P{pIdx}</td>
-                    <td className="py-1 px-3">[{bankersState.allocation[pIdx].join(', ')}]</td>
-                    <td className="py-1 px-3">[{bankersState.max[pIdx].join(', ')}]</td>
-                    <td className="py-1 px-3 font-bold text-indigo-400 print:text-indigo-900">
-                      [{bankersResult.needMatrix[pIdx]?.join(', ') || '-'}]
-                    </td>
+              <tbody className="divide-y divide-slate-800 print:divide-slate-300">
+                {cpuComparisons.map((item) => (
+                  <tr key={item.algo} className={item.algo === bestCpu.algo ? 'bg-indigo-950/20 font-semibold print:bg-slate-200' : ''}>
+                    <td className="px-3 py-1.5">{item.name}</td>
+                    <td className="px-3 py-1.5 text-indigo-400 print:text-indigo-900">{item.result.avgWaitingTime} ms</td>
+                    <td className="px-3 py-1.5 text-emerald-400 print:text-emerald-900">{item.result.avgTurnaroundTime} ms</td>
+                    <td className="px-3 py-1.5">{item.result.cpuUtilization}%</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+
+          <p className="text-xs leading-relaxed text-slate-300 print:text-slate-800">
+            On this workload, <strong>{bestCpu.name}</strong> gives the lowest average waiting time
+            ({bestCpu.result.avgWaitingTime} ms). This result depends on the arrival and burst values above;
+            changing them can change which policy wins.
+          </p>
         </section>
 
-        {/* SECTION 6: CONCLUSIONS & FACULTY SIGN-OFF */}
-        <section className="space-y-6 avoid-break pt-4 border-t border-slate-800 print:border-slate-300">
-          <div>
-            <h2 className="text-base font-bold uppercase tracking-wider text-indigo-400 print:text-indigo-900 mb-2">
-              6. Conclusion & Pedagogical Insights
-            </h2>
-            <ul className="list-disc list-inside text-xs text-slate-300 print:text-slate-800 space-y-1.5 leading-relaxed">
-              <li>
-                <strong>CPU Scheduling:</strong> SRTF and SJF mathematically achieve the theoretical minimum average waiting time by serving shorter bursts first, but demand prior knowledge of execution durations. Round Robin prevents starvation with predictable response times for interactive processes.
-              </li>
-              <li>
-                <strong>Memory Management:</strong> Optimal Page Replacement establishes the lower bound on page faults. LRU closely approximates this by exploiting temporal locality without requiring prescience.
-              </li>
-              <li>
-                <strong>Disk Storage:</strong> SCAN and LOOK algorithms eliminate the severe arm thrashing of FCFS by sweeping cylinders unidirectionally, amortizing mechanical head seeks.
-              </li>
-              <li>
-                <strong>Deadlock Prevention:</strong> Dijkstra’s Banker’s Algorithm provides safety guarantees by refusing resource allocations that cannot guarantee a hazard-free termination order.
-              </li>
-            </ul>
+        <section className="space-y-4 avoid-break page-break">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-1 print:border-slate-300">
+            <h3 className="flex items-center gap-2 text-base font-semibold text-indigo-400 print:text-indigo-900">
+              <Layers className="h-4 w-4" aria-hidden="true" />
+              3. Page replacement
+            </h3>
+            <span className="font-mono text-xs text-emerald-400 print:text-emerald-800">
+              Fewest faults: {bestPage.name} ({bestPage.result.totalFaults})
+            </span>
           </div>
 
-          {/* Academic Evaluation & Sign-off Block */}
-          <div className="pt-6 border-t border-dashed border-slate-700 print:border-slate-400">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 text-xs">
-              <div className="space-y-6">
-                <div>
-                  <span className="text-slate-400 print:text-slate-600 block text-[11px]">Submitted by Student:</span>
-                  <div className="mt-8 pt-2 border-t border-slate-600 print:border-black font-semibold">
-                    {studentInfo.studentName} ({studentInfo.rollNumber})
-                  </div>
-                </div>
-              </div>
+          <p className="text-xs leading-relaxed text-slate-300 print:text-slate-800">
+            Reference string: [{pageReferenceString.join(', ')}] with {frameCount} physical frames. A fault
+            means the page was not in memory and had to be loaded.
+          </p>
 
-              <div className="space-y-6">
-                <div>
-                  <span className="text-slate-400 print:text-slate-600 block text-[11px]">Evaluated & Approved by:</span>
-                  <div className="mt-8 pt-2 border-t border-slate-600 print:border-black font-semibold flex justify-between">
-                    <span>{studentInfo.guideName} (Faculty / Evaluator)</span>
-                    <span className="text-slate-400 print:text-slate-600 font-mono font-normal">Marks / Grade: _______</span>
-                  </div>
-                </div>
+          <table className="w-full border-collapse border border-slate-800 text-left text-xs font-mono print:border-slate-400">
+            <caption className="mb-1 text-left text-xs font-semibold text-slate-300 print:text-slate-800">
+              Table 3.1: Policy comparison
+            </caption>
+            <thead>
+              <tr className="border-b border-slate-800 bg-slate-950 print:border-slate-400 print:bg-slate-100">
+                <th scope="col" className="px-3 py-1.5 font-medium">Policy</th>
+                <th scope="col" className="px-3 py-1.5 font-medium">Faults</th>
+                <th scope="col" className="px-3 py-1.5 font-medium">Hits</th>
+                <th scope="col" className="px-3 py-1.5 font-medium">Hit rate</th>
+                <th scope="col" className="px-3 py-1.5 font-medium">Fault rate</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-800 print:divide-slate-300">
+              {pageComparisons.map((item) => (
+                <tr key={item.algo} className={item.algo === bestPage.algo ? 'bg-indigo-950/20 font-semibold print:bg-slate-200' : ''}>
+                  <td className="px-3 py-1.5">{item.name}</td>
+                  <td className="px-3 py-1.5 text-rose-400 print:text-rose-800">{item.result.totalFaults}</td>
+                  <td className="px-3 py-1.5 text-emerald-400 print:text-emerald-800">{item.result.totalHits}</td>
+                  <td className="px-3 py-1.5">{item.result.hitRatio}%</td>
+                  <td className="px-3 py-1.5">{item.result.faultRatio}%</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          <p className="text-xs leading-relaxed text-slate-300 print:text-slate-800">
+            FIFO is compared above using the full step-by-step grid in the simulator. Optimal replacement is
+            a theoretical lower bound because it uses future references; LRU is the practical approximation
+            used by most systems.
+          </p>
+        </section>
+
+        <section className="space-y-4 avoid-break">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-1 print:border-slate-300">
+            <h3 className="flex items-center gap-2 text-base font-semibold text-indigo-400 print:text-indigo-900">
+              <HardDrive className="h-4 w-4" aria-hidden="true" />
+              4. Disk scheduling
+            </h3>
+            <span className="font-mono text-xs text-emerald-400 print:text-emerald-800">
+              Shortest path: {bestDisk.name} ({bestDisk.result.totalHeadMovement} cylinders)
+            </span>
+          </div>
+
+          <p className="text-xs leading-relaxed text-slate-300 print:text-slate-800">
+            Requests: [{diskRequests.join(', ')}]. The arm starts at cylinder {diskInitialHead} on a disk
+            numbered 0 to {diskMaxCylinder}, moving {diskDirection === 'right' ? 'towards the last cylinder' : 'towards cylinder 0'}.
+          </p>
+
+          <table className="w-full border-collapse border border-slate-800 text-left text-xs font-mono print:border-slate-400">
+            <caption className="mb-1 text-left text-xs font-semibold text-slate-300 print:text-slate-800">
+              Table 4.1: Policy comparison
+            </caption>
+            <thead>
+              <tr className="border-b border-slate-800 bg-slate-950 print:border-slate-400 print:bg-slate-100">
+                <th scope="col" className="px-3 py-1.5 font-medium">Policy</th>
+                <th scope="col" className="px-3 py-1.5 font-medium">Total head movement</th>
+                <th scope="col" className="px-3 py-1.5 font-medium">Average seek</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-800 print:divide-slate-300">
+              {diskComparisons.map((item) => (
+                <tr key={item.algo} className={item.algo === bestDisk.algo ? 'bg-indigo-950/20 font-semibold print:bg-slate-200' : ''}>
+                  <td className="px-3 py-1.5">{item.name}</td>
+                  <td className="px-3 py-1.5 text-indigo-400 print:text-indigo-900">{item.result.totalHeadMovement} cyl</td>
+                  <td className="px-3 py-1.5">{item.result.avgSeekLength} cyl/request</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          <p className="text-xs leading-relaxed text-slate-300 print:text-slate-800">
+            <strong>{bestDisk.name}</strong> covers the shortest total distance for this queue
+            ({bestDisk.result.totalHeadMovement} cylinders). The step-by-step path is available in the disk
+            module.
+          </p>
+        </section>
+
+        <section className="space-y-4 avoid-break">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-1 print:border-slate-300">
+            <h3 className="flex items-center gap-2 text-base font-semibold text-indigo-400 print:text-indigo-900">
+              <ShieldCheck className="h-4 w-4" aria-hidden="true" />
+              5. Deadlock avoidance
+            </h3>
+            <span className={`font-mono text-xs font-semibold ${bankersResult.isSafe ? 'text-emerald-400 print:text-emerald-800' : 'text-rose-400 print:text-rose-800'}`}>
+              {bankersResult.isSafe ? 'Safe state' : 'Unsafe state'}
+            </span>
+          </div>
+
+          <p className="text-xs leading-relaxed text-slate-300 print:text-slate-800">
+            {bankersState.processCount} processes, resource types {bankersState.resourceNames.join(', ')},
+            available vector [{bankersState.available.join(', ')}].
+            {bankersResult.isSafe
+              ? ` A safe completion order is ${bankersResult.safeSequence.join(' → ')}.`
+              : ' No process can finish with the resources currently available, so no safe order exists.'}
+          </p>
+
+          <table className="w-full border-collapse border border-slate-800 text-center text-xs font-mono print:border-slate-400">
+            <caption className="mb-1 text-left text-xs font-semibold text-slate-300 print:text-slate-800">
+              Table 5.1: Allocation, maximum claim and remaining need
+            </caption>
+            <thead>
+              <tr className="border-b border-slate-800 bg-slate-950 print:border-slate-400 print:bg-slate-100">
+                <th scope="col" className="px-3 py-1.5 text-left font-medium">Process</th>
+                <th scope="col" className="px-3 py-1.5 font-medium">Allocation [{bankersState.resourceNames.join(', ')}]</th>
+                <th scope="col" className="px-3 py-1.5 font-medium">Max [{bankersState.resourceNames.join(', ')}]</th>
+                <th scope="col" className="px-3 py-1.5 font-medium text-indigo-400 print:text-indigo-900">Need [{bankersState.resourceNames.join(', ')}]</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-800 print:divide-slate-300">
+              {Array.from({ length: bankersState.processCount }).map((_, processIndex) => (
+                <tr key={processIndex}>
+                  <td className="px-3 py-1 text-left font-semibold">P{processIndex}</td>
+                  <td className="px-3 py-1">[{(bankersState.allocation[processIndex] ?? []).join(', ')}]</td>
+                  <td className="px-3 py-1">[{(bankersState.max[processIndex] ?? []).join(', ')}]</td>
+                  <td className="px-3 py-1 font-semibold text-indigo-400 print:text-indigo-900">
+                    [{(bankersResult.needMatrix[processIndex] ?? []).join(', ')}]
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {bankersResult.isSafe && bankersResult.steps.length > 0 && (
+            <table className="w-full border-collapse border border-slate-800 text-left text-xs font-mono print:border-slate-400">
+              <caption className="mb-1 text-left text-xs font-semibold text-slate-300 print:text-slate-800">
+                Table 5.2: Safety check
+              </caption>
+              <thead>
+                <tr className="border-b border-slate-800 bg-slate-950 print:border-slate-400 print:bg-slate-100">
+                  <th scope="col" className="px-3 py-1.5 font-medium">Step</th>
+                  <th scope="col" className="px-3 py-1.5 font-medium">Process</th>
+                  <th scope="col" className="px-3 py-1.5 font-medium">Work before</th>
+                  <th scope="col" className="px-3 py-1.5 font-medium">Need</th>
+                  <th scope="col" className="px-3 py-1.5 font-medium">Work after</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800 print:divide-slate-300">
+                {bankersResult.steps.map((step) => (
+                  <tr key={step.step}>
+                    <td className="px-3 py-1.5">{step.step}</td>
+                    <td className="px-3 py-1.5 font-semibold text-indigo-400 print:text-indigo-900">{step.processId}</td>
+                    <td className="px-3 py-1.5">[{step.workBefore.join(', ')}]</td>
+                    <td className="px-3 py-1.5">[{step.need.join(', ')}]</td>
+                    <td className="px-3 py-1.5 text-emerald-400 print:text-emerald-900">[{step.workAfter.join(', ')}]</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </section>
+
+        <section className="space-y-3 avoid-break">
+          <h3 className="border-b border-slate-800 pb-1 text-base font-semibold text-indigo-400 print:border-slate-300 print:text-indigo-900">
+            6. Conclusion
+          </h3>
+          <ul className="list-inside list-disc space-y-1.5 text-xs leading-relaxed text-slate-300 print:text-slate-800">
+            <li>
+              FCFS is easy to implement, but a long job near the front can delay everything behind it. SJF and
+              SRTF lower average waiting time when burst times are known in advance, and round robin trades
+              throughput for predictable response time.
+            </li>
+            <li>
+              Optimal page replacement is a benchmark rather than a real policy. LRU approximates it using
+              recent history, while FIFO can occasionally produce more faults with more frames.
+            </li>
+            <li>
+              SSTF shortens each seek but can starve requests far from the arm. SCAN and LOOK spread the
+              movement more fairly across the disk.
+            </li>
+            <li>
+              Banker's algorithm prevents unsafe allocations as long as every process declares its maximum
+              need honestly. An unsafe state is not a deadlock yet; it is a state that could become one.
+            </li>
+          </ul>
+        </section>
+
+        <footer className="space-y-6 border-t border-dashed border-slate-700 pt-6 print:border-slate-400">
+          <div className="grid grid-cols-1 gap-8 text-xs sm:grid-cols-2">
+            <div>
+              <span className="block text-[11px] text-slate-400 print:text-slate-600">Submitted by</span>
+              <div className="mt-8 border-t border-slate-600 pt-2 font-semibold print:border-black">
+                {studentInfo.studentName} ({studentInfo.rollNumber})
+              </div>
+            </div>
+            <div>
+              <span className="block text-[11px] text-slate-400 print:text-slate-600">Evaluated by</span>
+              <div className="mt-8 flex justify-between border-t border-slate-600 pt-2 font-semibold print:border-black">
+                <span>{studentInfo.guideName}</span>
+                <span className="font-mono font-normal text-slate-400 print:text-slate-600">Marks: ______</span>
               </div>
             </div>
           </div>
-        </section>
-      </div>
+        </footer>
+      </article>
     </div>
   );
 };

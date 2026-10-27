@@ -1,32 +1,44 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { CpuAlgorithm, CpuSchedulingResult, Process } from '../types/os';
 import { getCpuAlgorithmName, simulateCpuScheduling } from '../algorithms/cpuScheduling';
-import { Plus, Trash2, Shuffle, RotateCcw, BarChart3, Clock, Cpu, Award } from 'lucide-react';
+import { AlertCircle, BarChart3, Clock, Cpu, Plus, RotateCcw, Shuffle, Trash2 } from 'lucide-react';
 
 interface CpuSchedulingViewProps {
   processes: Process[];
   onUpdateProcesses: (processes: Process[]) => void;
   onResetDefaults: () => void;
+  quantum: number;
+  onUpdateQuantum: (quantum: number) => void;
 }
 
 const COLOR_PALETTE = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#eab308', '#f97316'];
+const MAX_PROCESSES = 10;
+
+const ALGORITHMS: { id: CpuAlgorithm; label: string; hint: string }[] = [
+  { id: 'FCFS', label: 'FCFS', hint: 'First come, first served. Runs processes in arrival order.' },
+  { id: 'SJF_NP', label: 'SJF', hint: 'Shortest job first. The shortest ready process runs to completion.' },
+  { id: 'SRTF', label: 'SRTF', hint: 'Shortest remaining time first. A shorter job can interrupt the current one.' },
+  { id: 'PRIORITY_NP', label: 'Priority', hint: 'Highest-priority process runs to completion. A lower number means higher priority.' },
+  { id: 'PRIORITY_P', label: 'Priority (preemptive)', hint: 'A higher-priority arrival interrupts the running process.' },
+  { id: 'RR', label: 'Round robin', hint: 'Each process gets one time slice, then moves to the back of the queue.' },
+];
 
 export const CpuSchedulingView: React.FC<CpuSchedulingViewProps> = ({
   processes,
   onUpdateProcesses,
   onResetDefaults,
+  quantum,
+  onUpdateQuantum,
 }) => {
   const [selectedAlgo, setSelectedAlgo] = useState<CpuAlgorithm>('FCFS');
-  const [quantum, setQuantum] = useState<number>(2);
   const [showComparison, setShowComparison] = useState<boolean>(false);
   const [showLogs, setShowLogs] = useState<boolean>(false);
 
-  // Compute current algorithm simulation
-  const result: CpuSchedulingResult = useMemo(() => {
-    return simulateCpuScheduling(processes, selectedAlgo, quantum);
-  }, [processes, selectedAlgo, quantum]);
+  const result: CpuSchedulingResult = useMemo(
+    () => simulateCpuScheduling(processes, selectedAlgo, quantum),
+    [processes, selectedAlgo, quantum]
+  );
 
-  // Compute comparison of all algorithms
   const comparisonResults = useMemo(() => {
     if (!showComparison) return [];
     const algos: CpuAlgorithm[] = ['FCFS', 'SJF_NP', 'SRTF', 'PRIORITY_NP', 'PRIORITY_P', 'RR'];
@@ -42,219 +54,248 @@ export const CpuSchedulingView: React.FC<CpuSchedulingViewProps> = ({
     return [...comparisonResults].sort((a, b) => a.result.avgWaitingTime - b.result.avgWaitingTime)[0];
   }, [comparisonResults]);
 
-  // Handlers for process table
+  const maxWaitingTime = useMemo(
+    () => Math.max(1, ...comparisonResults.map((item) => item.result.avgWaitingTime)),
+    [comparisonResults]
+  );
+
+  const activeHint = ALGORITHMS.find((algo) => algo.id === selectedAlgo)?.hint;
+
   const handleAddProcess = () => {
-    const nextNum = processes.length + 1;
-    const nextColor = COLOR_PALETTE[(nextNum - 1) % COLOR_PALETTE.length];
-    const newProc: Process = {
-      id: `P${nextNum}`,
-      arrivalTime: processes.length > 0 ? Math.max(...processes.map((p) => p.arrivalTime)) + 1 : 0,
-      burstTime: Math.floor(Math.random() * 6) + 2,
-      priority: Math.floor(Math.random() * 5) + 1,
-      color: nextColor,
+    if (processes.length >= MAX_PROCESSES) return;
+
+    const usedNumbers = processes
+      .map((process) => Number.parseInt(process.id.replace(/[^0-9]/g, ''), 10))
+      .filter((value) => Number.isFinite(value));
+    const nextNumber = (usedNumbers.length > 0 ? Math.max(...usedNumbers) : 0) + 1;
+
+    const newProcess: Process = {
+      id: `P${nextNumber}`,
+      arrivalTime: processes.length > 0 ? Math.max(...processes.map((process) => process.arrivalTime)) : 0,
+      burstTime: 4,
+      priority: 1,
+      color: COLOR_PALETTE[(nextNumber - 1) % COLOR_PALETTE.length],
     };
-    onUpdateProcesses([...processes, newProc]);
+
+    onUpdateProcesses([...processes, newProcess]);
   };
 
   const handleDeleteProcess = (id: string) => {
     if (processes.length <= 1) return;
-    onUpdateProcesses(processes.filter((p) => p.id !== id));
+    onUpdateProcesses(processes.filter((process) => process.id !== id));
   };
 
-  const handleUpdateProcess = (id: string, field: keyof Process, value: number) => {
+  const handleUpdateProcess = (id: string, field: 'arrivalTime' | 'burstTime' | 'priority', value: number) => {
+    const minimum = field === 'arrivalTime' ? 0 : 1;
     onUpdateProcesses(
-      processes.map((p) => {
-        if (p.id === id) {
-          return { ...p, [field]: Math.max(0, value) };
-        }
-        return p;
-      })
+      processes.map((process) =>
+        process.id === id ? { ...process, [field]: Math.max(minimum, value) } : process
+      )
     );
   };
 
   const handleRandomize = () => {
-    const count = 5;
-    const newProcs: Process[] = [];
-    for (let i = 1; i <= count; i++) {
-      newProcs.push({
-        id: `P${i}`,
-        arrivalTime: Math.floor(Math.random() * 5),
-        burstTime: Math.floor(Math.random() * 8) + 2,
-        priority: Math.floor(Math.random() * 5) + 1,
-        color: COLOR_PALETTE[(i - 1) % COLOR_PALETTE.length],
-      });
-    }
-    onUpdateProcesses(newProcs);
+    const newProcesses: Process[] = Array.from({ length: 5 }, (_, index) => ({
+      id: `P${index + 1}`,
+      arrivalTime: Math.floor(Math.random() * 5),
+      burstTime: Math.floor(Math.random() * 8) + 2,
+      priority: Math.floor(Math.random() * 5) + 1,
+      color: COLOR_PALETTE[index % COLOR_PALETTE.length],
+    }));
+    onUpdateProcesses(newProcesses);
   };
 
   return (
     <div className="space-y-6">
-      {/* Module Overview Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
-        <div>
-          <h2 className="text-xl font-bold text-slate-100 flex items-center gap-2">
-            <Cpu className="w-5 h-5 text-indigo-400" />
-            CPU Process Scheduling Simulation
-          </h2>
-          <p className="text-xs text-slate-400 mt-1">
-            Simulate and compare how operating system schedulers allocate CPU time among competing processes.
+      <header className="flex flex-col gap-4 border-b border-slate-800 pb-5 md:flex-row md:items-end md:justify-between">
+        <div className="max-w-2xl">
+          <p className="text-xs font-medium text-indigo-400">Module 1</p>
+          <h1 className="mt-1 flex items-center gap-2 text-xl font-semibold text-slate-100">
+            <Cpu className="h-5 w-5 text-indigo-400" aria-hidden="true" />
+            CPU scheduling
+          </h1>
+          <p className="mt-1.5 text-sm leading-relaxed text-slate-400">
+            Enter the processes once, then switch between scheduling policies. The Gantt chart and
+            the numbers update immediately, which makes it easy to compare one policy against another.
           </p>
         </div>
 
-        {/* Algorithm Selection Buttons */}
-        <div className="flex flex-wrap items-center gap-1.5 p-1 bg-slate-900 border border-slate-800 rounded-lg">
-          {(
-            [
-              ['FCFS', 'FCFS'],
-              ['SJF_NP', 'SJF (NP)'],
-              ['SRTF', 'SRTF (P)'],
-              ['PRIORITY_NP', 'Priority (NP)'],
-              ['PRIORITY_P', 'Priority (P)'],
-              ['RR', 'Round Robin'],
-            ] as [CpuAlgorithm, string][]
-          ).map(([key, label]) => (
+        <div className="flex flex-wrap items-center gap-1 rounded-lg border border-slate-800 bg-slate-900 p-1">
+          {ALGORITHMS.map((algo) => (
             <button
-              key={key}
-              onClick={() => setSelectedAlgo(key)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
-                selectedAlgo === key
-                  ? 'bg-indigo-600 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+              key={algo.id}
+              type="button"
+              onClick={() => setSelectedAlgo(algo.id)}
+              title={algo.hint}
+              aria-pressed={selectedAlgo === algo.id}
+              className={`rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                selectedAlgo === algo.id
+                  ? 'bg-indigo-600 text-white'
+                  : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
               }`}
             >
-              {label}
+              {algo.label}
             </button>
           ))}
         </div>
-      </div>
+      </header>
 
-      {/* Control Strip & Quantum */}
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-900/60 p-3 rounded-lg border border-slate-800">
-        <div className="flex items-center gap-3">
-          <span className="text-xs font-semibold text-slate-300">Active Algorithm:</span>
-          <span className="text-xs font-mono text-indigo-300 bg-indigo-950/60 border border-indigo-800/50 px-2 py-0.5 rounded">
-            {getCpuAlgorithmName(selectedAlgo)}
-          </span>
+      <div className="flex flex-col gap-3 rounded-lg border border-slate-800 bg-slate-900/60 p-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <p className="text-sm text-slate-300">
+            <span className="font-medium text-slate-100">{getCpuAlgorithmName(selectedAlgo)}</span>
+            <span className="ml-2 text-slate-500">{activeHint}</span>
+          </p>
 
           {selectedAlgo === 'RR' && (
-            <div className="flex items-center gap-2 pl-3 border-l border-slate-700">
-              <label className="text-xs text-slate-300 flex items-center gap-1">
-                <Clock className="w-3.5 h-3.5 text-amber-400" />
-                Time Quantum (Q):
-              </label>
+            <label className="flex items-center gap-2 text-xs text-slate-300">
+              <Clock className="h-3.5 w-3.5 text-amber-400" aria-hidden="true" />
+              Time slice
               <input
                 type="number"
-                min="1"
-                max="20"
+                min={1}
+                max={20}
                 value={quantum}
-                onChange={(e) => setQuantum(Math.max(1, parseInt(e.target.value) || 1))}
-                className="w-16 px-2 py-1 text-xs bg-slate-950 border border-slate-700 rounded text-center text-slate-100 focus:outline-none focus:border-indigo-500 font-mono"
+                onChange={(event) => onUpdateQuantum(Math.max(1, Number.parseInt(event.target.value, 10) || 1))}
+                className="w-14 rounded border border-slate-700 bg-slate-950 px-2 py-1 text-center text-xs text-slate-100 focus:border-indigo-500 focus:outline-none"
+                aria-label="Round robin time slice"
               />
-            </div>
+              <span className="text-slate-500">ms</span>
+            </label>
           )}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button
+            type="button"
             onClick={handleAddProcess}
-            className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-md transition-colors"
+            disabled={processes.length >= MAX_PROCESSES}
+            title={processes.length >= MAX_PROCESSES ? `The table holds up to ${MAX_PROCESSES} processes.` : 'Add a row to the process table'}
+            className="flex items-center gap-1 rounded-md border border-slate-700 bg-slate-800 px-2.5 py-1.5 text-xs font-medium text-slate-200 transition-colors hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            <Plus className="w-3.5 h-3.5 text-emerald-400" />
-            Add Process
+            <Plus className="h-3.5 w-3.5 text-emerald-400" aria-hidden="true" />
+            Add process
           </button>
           <button
+            type="button"
             onClick={handleRandomize}
-            className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-md transition-colors"
+            className="flex items-center gap-1 rounded-md border border-slate-700 bg-slate-800 px-2.5 py-1.5 text-xs font-medium text-slate-200 transition-colors hover:bg-slate-700"
           >
-            <Shuffle className="w-3.5 h-3.5 text-amber-400" />
-            Randomize
+            <Shuffle className="h-3.5 w-3.5 text-amber-400" aria-hidden="true" />
+            Randomise
           </button>
           <button
+            type="button"
             onClick={onResetDefaults}
-            className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-md transition-colors"
+            className="flex items-center gap-1 rounded-md border border-slate-700 bg-slate-800 px-2.5 py-1.5 text-xs font-medium text-slate-200 transition-colors hover:bg-slate-700"
           >
-            <RotateCcw className="w-3.5 h-3.5 text-slate-400" />
-            Reset Presets
+            <RotateCcw className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
+            Reset example
           </button>
           <button
-            onClick={() => setShowComparison(!showComparison)}
-            className={`flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+            type="button"
+            onClick={() => setShowComparison((value) => !value)}
+            aria-pressed={showComparison}
+            className={`flex items-center gap-1 rounded-md border px-2.5 py-1.5 text-xs font-medium transition-colors ${
               showComparison
-                ? 'bg-amber-500/20 text-amber-300 border border-amber-500/50'
-                : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700'
+                ? 'border-amber-500/50 bg-amber-500/15 text-amber-200'
+                : 'border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700'
             }`}
           >
-            <BarChart3 className="w-3.5 h-3.5" />
-            {showComparison ? 'Hide Comparison' : 'Compare All Algos'}
+            <BarChart3 className="h-3.5 w-3.5" aria-hidden="true" />
+            {showComparison ? 'Hide comparison' : 'Compare algorithms'}
           </button>
         </div>
       </div>
 
-      {/* Process Table & Configuration Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-lg p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-              Process Table Input ({processes.length})
-            </h3>
-            <span className="text-[11px] text-slate-500">Lower priority number = Higher priority</span>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+        <section className="lg:col-span-5 rounded-lg border border-slate-800 bg-slate-900 p-4" aria-labelledby="cpu-input-heading">
+          <div className="mb-3 flex items-start justify-between gap-3">
+            <div>
+              <h2 id="cpu-input-heading" className="text-sm font-semibold text-slate-200">
+                Processes
+              </h2>
+              <p className="mt-0.5 text-xs text-slate-500">{processes.length} of {MAX_PROCESSES} rows used</p>
+            </div>
+            <p className="max-w-[9rem] text-right text-[11px] leading-snug text-slate-500">
+              A lower priority number means a more important process.
+            </p>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs">
+            <table className="w-full border-collapse text-left text-xs">
               <thead>
-                <tr className="border-b border-slate-800 text-slate-400 font-mono">
-                  <th className="py-2 px-2">PID</th>
-                  <th className="py-2 px-2">Arrival (AT)</th>
-                  <th className="py-2 px-2">Burst (BT)</th>
-                  <th className="py-2 px-2">Priority</th>
-                  <th className="py-2 px-1 text-center">Action</th>
+                <tr className="border-b border-slate-800 text-slate-400">
+                  <th scope="col" className="px-2 py-2 font-medium">Process</th>
+                  <th scope="col" className="px-2 py-2 font-medium" title="When the process becomes ready">
+                    Arrival
+                  </th>
+                  <th scope="col" className="px-2 py-2 font-medium" title="How much CPU time it needs">
+                    Burst
+                  </th>
+                  <th scope="col" className="px-2 py-2 font-medium" title="Lower value means higher priority">
+                    Priority
+                  </th>
+                  <th scope="col" className="px-1 py-2 text-center font-medium">
+                    <span className="sr-only">Actions</span>
+                  </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-850 font-mono">
-                {processes.map((proc) => (
-                  <tr key={proc.id} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="py-2 px-2">
+              <tbody className="divide-y divide-slate-800">
+                {processes.map((process) => (
+                  <tr key={process.id} className="transition-colors hover:bg-slate-800/40">
+                    <td className="px-2 py-2">
                       <div className="flex items-center gap-2">
-                        <span className="w-3 h-3 rounded-full" style={{ backgroundColor: proc.color }} />
-                        <span className="font-bold text-slate-200">{proc.id}</span>
+                        <span className="h-3 w-3 rounded-full" style={{ backgroundColor: process.color }} aria-hidden="true" />
+                        <span className="font-mono font-semibold text-slate-200">{process.id}</span>
                       </div>
                     </td>
-                    <td className="py-2 px-2">
+                    <td className="px-2 py-2">
                       <input
                         type="number"
-                        min="0"
-                        value={proc.arrivalTime}
-                        onChange={(e) => handleUpdateProcess(proc.id, 'arrivalTime', parseInt(e.target.value) || 0)}
-                        className="w-14 px-1.5 py-0.5 bg-slate-950 border border-slate-800 rounded text-slate-200 focus:outline-none focus:border-indigo-500"
+                        min={0}
+                        value={process.arrivalTime}
+                        onChange={(event) =>
+                          handleUpdateProcess(process.id, 'arrivalTime', Number.parseInt(event.target.value, 10) || 0)
+                        }
+                        aria-label={`${process.id} arrival time`}
+                        className="w-14 rounded border border-slate-800 bg-slate-950 px-1.5 py-1 text-slate-200 focus:border-indigo-500 focus:outline-none"
                       />
                     </td>
-                    <td className="py-2 px-2">
+                    <td className="px-2 py-2">
                       <input
                         type="number"
-                        min="1"
-                        value={proc.burstTime}
-                        onChange={(e) => handleUpdateProcess(proc.id, 'burstTime', parseInt(e.target.value) || 1)}
-                        className="w-14 px-1.5 py-0.5 bg-slate-950 border border-slate-800 rounded text-slate-200 focus:outline-none focus:border-indigo-500"
+                        min={1}
+                        value={process.burstTime}
+                        onChange={(event) =>
+                          handleUpdateProcess(process.id, 'burstTime', Number.parseInt(event.target.value, 10) || 1)
+                        }
+                        aria-label={`${process.id} burst time`}
+                        className="w-14 rounded border border-slate-800 bg-slate-950 px-1.5 py-1 text-slate-200 focus:border-indigo-500 focus:outline-none"
                       />
                     </td>
-                    <td className="py-2 px-2">
+                    <td className="px-2 py-2">
                       <input
                         type="number"
-                        min="1"
-                        value={proc.priority}
-                        onChange={(e) => handleUpdateProcess(proc.id, 'priority', parseInt(e.target.value) || 1)}
-                        className="w-14 px-1.5 py-0.5 bg-slate-950 border border-slate-800 rounded text-slate-200 focus:outline-none focus:border-indigo-500"
+                        min={1}
+                        value={process.priority}
+                        onChange={(event) =>
+                          handleUpdateProcess(process.id, 'priority', Number.parseInt(event.target.value, 10) || 1)
+                        }
+                        aria-label={`${process.id} priority`}
+                        className="w-14 rounded border border-slate-800 bg-slate-950 px-1.5 py-1 text-slate-200 focus:border-indigo-500 focus:outline-none"
                       />
                     </td>
-                    <td className="py-2 px-1 text-center">
+                    <td className="px-1 py-2 text-center">
                       <button
-                        onClick={() => handleDeleteProcess(proc.id)}
+                        type="button"
+                        onClick={() => handleDeleteProcess(process.id)}
                         disabled={processes.length <= 1}
-                        title="Delete process"
-                        className="p-1 text-slate-500 hover:text-rose-400 disabled:opacity-20 disabled:hover:text-slate-500 transition-colors"
+                        title={processes.length <= 1 ? 'Keep at least one process' : `Remove ${process.id}`}
+                        aria-label={`Remove ${process.id}`}
+                        className="rounded p-1 text-slate-500 transition-colors hover:text-rose-400 disabled:cursor-not-allowed disabled:opacity-20"
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        <Trash2 className="h-3.5 w-3.5" />
                       </button>
                     </td>
                   </tr>
@@ -262,219 +303,230 @@ export const CpuSchedulingView: React.FC<CpuSchedulingViewProps> = ({
               </tbody>
             </table>
           </div>
-        </div>
 
-        {/* KPI Metric Summary Cards */}
-        <div className="lg:col-span-7 flex flex-col justify-between gap-4">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="bg-slate-900 border border-slate-800 rounded-lg p-3">
-              <span className="text-[11px] text-slate-400 block font-medium">Avg Waiting Time</span>
-              <span className="text-xl font-bold font-mono text-indigo-400 mt-1 block">
-                {result.avgWaitingTime} <span className="text-xs text-slate-500 font-normal">ms</span>
-              </span>
-              <span className="text-[10px] text-slate-500 font-mono mt-0.5 block">WT = TAT - BT</span>
+          {processes.length >= MAX_PROCESSES && (
+            <p className="mt-3 flex items-start gap-1.5 text-[11px] text-amber-300/80">
+              <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+              The table is full. Remove a row before adding another process.
+            </p>
+          )}
+        </section>
+
+        <div className="flex flex-col justify-between gap-4 lg:col-span-7">
+          <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div className="rounded-lg border border-slate-800 bg-slate-900 p-3">
+              <dt className="text-[11px] font-medium text-slate-400">Average waiting</dt>
+              <dd className="mt-1 font-mono text-xl font-semibold text-indigo-400">
+                {result.avgWaitingTime}<span className="ml-1 text-xs font-normal text-slate-500">ms</span>
+              </dd>
+              <dd className="mt-0.5 font-mono text-[10px] text-slate-500">TAT - burst</dd>
+            </div>
+            <div className="rounded-lg border border-slate-800 bg-slate-900 p-3">
+              <dt className="text-[11px] font-medium text-slate-400">Average turnaround</dt>
+              <dd className="mt-1 font-mono text-xl font-semibold text-emerald-400">
+                {result.avgTurnaroundTime}<span className="ml-1 text-xs font-normal text-slate-500">ms</span>
+              </dd>
+              <dd className="mt-0.5 font-mono text-[10px] text-slate-500">completion - arrival</dd>
+            </div>
+            <div className="rounded-lg border border-slate-800 bg-slate-900 p-3">
+              <dt className="text-[11px] font-medium text-slate-400">CPU utilisation</dt>
+              <dd className="mt-1 font-mono text-xl font-semibold text-amber-400">{result.cpuUtilization}%</dd>
+              <dd className="mt-0.5 font-mono text-[10px] text-slate-500">busy / total time</dd>
+            </div>
+            <div className="rounded-lg border border-slate-800 bg-slate-900 p-3">
+              <dt className="text-[11px] font-medium text-slate-400">Throughput</dt>
+              <dd className="mt-1 font-mono text-xl font-semibold text-purple-400">{result.throughput}</dd>
+              <dd className="mt-0.5 font-mono text-[10px] text-slate-500">processes per time unit</dd>
+            </div>
+          </dl>
+
+          <section className="rounded-lg border border-slate-800 bg-slate-900 p-4" aria-labelledby="gantt-heading">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <h2 id="gantt-heading" className="text-sm font-semibold text-slate-200">
+                Gantt chart
+              </h2>
+              <p className="font-mono text-[11px] text-slate-500">{result.totalTime} ms total</p>
             </div>
 
-            <div className="bg-slate-900 border border-slate-800 rounded-lg p-3">
-              <span className="text-[11px] text-slate-400 block font-medium">Avg Turnaround</span>
-              <span className="text-xl font-bold font-mono text-emerald-400 mt-1 block">
-                {result.avgTurnaroundTime} <span className="text-xs text-slate-500 font-normal">ms</span>
-              </span>
-              <span className="text-[10px] text-slate-500 font-mono mt-0.5 block">TAT = CT - AT</span>
-            </div>
-
-            <div className="bg-slate-900 border border-slate-800 rounded-lg p-3">
-              <span className="text-[11px] text-slate-400 block font-medium">CPU Utilization</span>
-              <span className="text-xl font-bold font-mono text-amber-400 mt-1 block">
-                {result.cpuUtilization}%
-              </span>
-              <span className="text-[10px] text-slate-500 font-mono mt-0.5 block">Busy / Total Time</span>
-            </div>
-
-            <div className="bg-slate-900 border border-slate-800 rounded-lg p-3">
-              <span className="text-[11px] text-slate-400 block font-medium">Throughput</span>
-              <span className="text-xl font-bold font-mono text-purple-400 mt-1 block">
-                {result.throughput}
-              </span>
-              <span className="text-[10px] text-slate-500 font-mono mt-0.5 block">Procs / Unit Time</span>
-            </div>
-          </div>
-
-          {/* Interactive Gantt Chart Display */}
-          <div className="bg-slate-900 border border-slate-800 rounded-lg p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-                <span>Visual Gantt Chart</span>
-                <span className="text-slate-500 font-normal lowercase font-mono">({result.totalTime} ms total)</span>
-              </h3>
-              <div className="flex items-center gap-2 text-[11px] text-slate-400">
-                <span className="w-2.5 h-2.5 rounded-sm bg-slate-700 inline-block" /> Idle
-                <span className="w-2.5 h-2.5 rounded-sm bg-indigo-500 inline-block ml-2" /> Active
-              </div>
-            </div>
-
-            {/* Gantt Bar */}
-            <div className="w-full overflow-x-auto pb-2">
-              <div className="min-w-[480px]">
-                <div className="flex w-full h-11 rounded-md overflow-hidden border border-slate-700 bg-slate-950">
-                  {result.ganttChart.map((seg, idx) => {
-                    const widthPercent = (seg.duration / Math.max(1, result.totalTime)) * 100;
-                    const isIdle = seg.processId === 'IDLE';
-
+            <div className="overflow-x-auto pb-1">
+              <div className="min-w-[420px]">
+                <div className="flex h-11 w-full overflow-hidden rounded-md border border-slate-700 bg-slate-950">
+                  {result.ganttChart.map((segment, index) => {
+                    const isIdle = segment.processId === 'IDLE';
                     return (
                       <div
-                        key={idx}
+                        key={`${segment.processId}-${segment.startTime}-${index}`}
                         style={{
-                          width: `${Math.max(widthPercent, 3)}%`,
-                          backgroundColor: isIdle ? '#1e293b' : seg.color || '#4f46e5',
+                          flexGrow: Math.max(segment.duration, 0.25),
+                          flexBasis: 0,
+                          minWidth: 18,
+                          backgroundColor: isIdle ? '#1e293b' : segment.color || '#4f46e5',
                         }}
-                        className={`h-full flex items-center justify-center font-mono text-xs font-bold transition-all relative group border-r border-slate-900/40 ${
+                        className={`flex h-full min-w-0 items-center justify-center border-r border-slate-950/60 font-mono text-xs font-semibold ${
                           isIdle ? 'text-slate-500' : 'text-white'
                         }`}
-                        title={`${seg.processId}: Time ${seg.startTime} to ${seg.endTime} (${seg.duration}ms)`}
+                        title={`${isIdle ? 'Idle' : segment.processId}: ${segment.startTime} to ${segment.endTime} ms (${segment.duration} ms)`}
                       >
-                        <span className="truncate px-1">{seg.processId}</span>
+                        <span className="truncate px-1">{isIdle ? 'idle' : segment.processId}</span>
                       </div>
                     );
                   })}
                 </div>
 
-                {/* Timeline Axis Markers */}
-                <div className="flex w-full justify-between text-[10px] font-mono text-slate-400 mt-1.5 px-0.5">
-                  <span>0</span>
-                  {result.ganttChart.map((seg, idx) => (
-                    <span key={idx}>{seg.endTime}</span>
-                  ))}
+                <div className="relative mt-1 h-4 font-mono text-[10px] text-slate-500" aria-hidden="true">
+                  <span className="absolute left-0">0</span>
+                  <span className="absolute right-0">{result.totalTime} ms</span>
                 </div>
               </div>
             </div>
-          </div>
+
+            <ul className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-slate-400">
+              {processes.map((process) => (
+                <li key={process.id} className="flex items-center gap-1.5">
+                  <span className="h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: process.color }} aria-hidden="true" />
+                  {process.id}
+                </li>
+              ))}
+              <li className="flex items-center gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-sm bg-slate-700" aria-hidden="true" />
+                idle
+              </li>
+            </ul>
+          </section>
         </div>
       </div>
 
-      {/* Process Execution Result Breakdown Table */}
-      <div className="bg-slate-900 border border-slate-800 rounded-lg p-4">
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">
-          Process Execution Breakdown & Mathematical Proofs
-        </h3>
+      <section className="rounded-lg border border-slate-800 bg-slate-900 p-4" aria-labelledby="cpu-results-heading">
+        <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
+          <h2 id="cpu-results-heading" className="text-sm font-semibold text-slate-200">
+            Per-process results
+          </h2>
+          <p className="font-mono text-[10px] text-slate-500">AT arrival · BT burst · CT completion · TAT turnaround · WT waiting · RT response</p>
+        </div>
+
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs">
+          <table className="w-full border-collapse text-left text-xs">
             <thead>
-              <tr className="border-b border-slate-800 text-slate-400 font-mono">
-                <th className="py-2.5 px-3">Process</th>
-                <th className="py-2.5 px-3">Arrival Time (AT)</th>
-                <th className="py-2.5 px-3">Burst Time (BT)</th>
-                <th className="py-2.5 px-3">Priority</th>
-                <th className="py-2.5 px-3">Completion (CT)</th>
-                <th className="py-2.5 px-3 font-semibold text-emerald-400">Turnaround (TAT)</th>
-                <th className="py-2.5 px-3 font-semibold text-indigo-400">Waiting Time (WT)</th>
-                <th className="py-2.5 px-3">Response Time (RT)</th>
+              <tr className="border-b border-slate-800 text-slate-400">
+                <th scope="col" className="px-3 py-2.5 font-medium">Process</th>
+                <th scope="col" className="px-3 py-2.5 font-medium">AT</th>
+                <th scope="col" className="px-3 py-2.5 font-medium">BT</th>
+                <th scope="col" className="px-3 py-2.5 font-medium">Priority</th>
+                <th scope="col" className="px-3 py-2.5 font-medium">CT</th>
+                <th scope="col" className="px-3 py-2.5 font-medium text-emerald-400">TAT</th>
+                <th scope="col" className="px-3 py-2.5 font-medium text-indigo-400">WT</th>
+                <th scope="col" className="px-3 py-2.5 font-medium">RT</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-850 font-mono">
-              {result.processMetrics.map((m) => (
-                <tr key={m.id} className="hover:bg-slate-800/40 transition-colors">
-                  <td className="py-2.5 px-3 font-bold text-slate-200">{m.id}</td>
-                  <td className="py-2.5 px-3 text-slate-300">{m.arrivalTime}</td>
-                  <td className="py-2.5 px-3 text-slate-300">{m.burstTime}</td>
-                  <td className="py-2.5 px-3 text-slate-400">{m.priority}</td>
-                  <td className="py-2.5 px-3 text-slate-200">{m.completionTime}</td>
-                  <td className="py-2.5 px-3 font-bold text-emerald-400">{m.turnaroundTime}</td>
-                  <td className="py-2.5 px-3 font-bold text-indigo-400">{m.waitingTime}</td>
-                  <td className="py-2.5 px-3 text-slate-300">{m.responseTime}</td>
+            <tbody className="divide-y divide-slate-800 font-mono">
+              {result.processMetrics.map((metric) => (
+                <tr key={metric.id} className="transition-colors hover:bg-slate-800/40">
+                  <td className="px-3 py-2.5 font-semibold text-slate-200">{metric.id}</td>
+                  <td className="px-3 py-2.5 text-slate-300">{metric.arrivalTime}</td>
+                  <td className="px-3 py-2.5 text-slate-300">{metric.burstTime}</td>
+                  <td className="px-3 py-2.5 text-slate-400">{metric.priority}</td>
+                  <td className="px-3 py-2.5 text-slate-200">{metric.completionTime}</td>
+                  <td className="px-3 py-2.5 font-semibold text-emerald-400">{metric.turnaroundTime}</td>
+                  <td className="px-3 py-2.5 font-semibold text-indigo-400">{metric.waitingTime}</td>
+                  <td className="px-3 py-2.5 text-slate-300">{metric.responseTime}</td>
                 </tr>
               ))}
-              <tr className="bg-slate-950/60 font-bold border-t border-slate-700">
-                <td colSpan={5} className="py-3 px-3 text-slate-400 text-right uppercase tracking-wider text-[11px]">
-                  Algorithm Averages:
+              <tr className="border-t border-slate-700 bg-slate-950/60 font-semibold">
+                <td colSpan={5} className="px-3 py-3 text-right text-[11px] font-medium text-slate-400">
+                  Averages
                 </td>
-                <td className="py-3 px-3 text-emerald-400 font-mono text-sm">{result.avgTurnaroundTime} ms</td>
-                <td className="py-3 px-3 text-indigo-400 font-mono text-sm">{result.avgWaitingTime} ms</td>
-                <td className="py-3 px-3 text-slate-400 font-mono text-sm">{result.avgResponseTime} ms</td>
+                <td className="px-3 py-3 font-mono text-sm text-emerald-400">{result.avgTurnaroundTime} ms</td>
+                <td className="px-3 py-3 font-mono text-sm text-indigo-400">{result.avgWaitingTime} ms</td>
+                <td className="px-3 py-3 font-mono text-sm text-slate-300">{result.avgResponseTime} ms</td>
               </tr>
             </tbody>
           </table>
         </div>
-      </div>
+      </section>
 
-      {/* Side-by-Side Algorithm Comparison Panel */}
       {showComparison && (
-        <div className="bg-slate-900 border border-amber-500/30 rounded-lg p-5 space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Award className="w-5 h-5 text-amber-400" />
-              <h3 className="text-sm font-bold text-slate-100">
-                Comparative Performance Matrix across All 6 CPU Schedulers
-              </h3>
+        <section className="space-y-4 rounded-lg border border-amber-500/30 bg-slate-900 p-5" aria-labelledby="cpu-comparison-heading">
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <div>
+              <h2 id="cpu-comparison-heading" className="text-sm font-semibold text-slate-100">
+                All six algorithms on this workload
+              </h2>
+              <p className="mt-1 text-xs text-slate-400">
+                The same processes, measured by average waiting time. Round robin uses a time slice of {quantum} ms.
+              </p>
             </div>
             {bestAlgoForWaitingTime && (
-              <span className="text-xs text-emerald-400 font-mono">
-                Optimal for Min Waiting Time: <strong className="underline">{bestAlgoForWaitingTime.name}</strong>
-              </span>
+              <p className="text-xs text-emerald-300">
+                Lowest waiting time: <strong className="font-semibold">{bestAlgoForWaitingTime.name}</strong>
+              </p>
             )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {comparisonResults.map(({ algo, name, result: r }) => {
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+            {comparisonResults.map(({ algo, name, result: comparison }) => {
               const isBest = bestAlgoForWaitingTime?.algo === algo;
               return (
                 <div
                   key={algo}
-                  className={`p-3.5 rounded-lg border transition-all ${
-                    isBest
-                      ? 'bg-emerald-950/20 border-emerald-500/40 ring-1 ring-emerald-500/30'
-                      : 'bg-slate-950/60 border-slate-800'
+                  className={`rounded-lg border p-3.5 ${
+                    isBest ? 'border-emerald-500/40 bg-emerald-950/20' : 'border-slate-800 bg-slate-950/60'
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-semibold text-slate-200">{name}</span>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-medium text-slate-200">{name}</span>
                     {isBest && (
-                      <span className="text-[10px] uppercase font-bold text-emerald-400 bg-emerald-950 px-1.5 py-0.5 rounded border border-emerald-800">
-                        Best WT
+                      <span className="rounded bg-emerald-950 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-300">
+                        Lowest WT
                       </span>
                     )}
                   </div>
 
-                  <div className="space-y-1.5 font-mono text-xs">
-                    <div className="flex justify-between text-slate-400">
-                      <span>Avg Waiting Time:</span>
-                      <span className="font-bold text-indigo-400">{r.avgWaitingTime} ms</span>
-                    </div>
-                    <div className="flex justify-between text-slate-400">
-                      <span>Avg Turnaround:</span>
-                      <span className="font-bold text-emerald-400">{r.avgTurnaroundTime} ms</span>
-                    </div>
-                    <div className="flex justify-between text-slate-400">
-                      <span>CPU Utilization:</span>
-                      <span className="text-amber-400">{r.cpuUtilization}%</span>
-                    </div>
+                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-800">
+                    <div
+                      className={`h-full rounded-full ${isBest ? 'bg-emerald-500' : 'bg-indigo-500'}`}
+                      style={{ width: `${Math.max(4, (comparison.avgWaitingTime / maxWaitingTime) * 100)}%` }}
+                    />
                   </div>
+
+                  <dl className="mt-2.5 space-y-1 font-mono text-xs">
+                    <div className="flex justify-between gap-3">
+                      <dt className="text-slate-500">Average waiting</dt>
+                      <dd className="font-semibold text-indigo-300">{comparison.avgWaitingTime} ms</dd>
+                    </div>
+                    <div className="flex justify-between gap-3">
+                      <dt className="text-slate-500">Average turnaround</dt>
+                      <dd className="text-emerald-300">{comparison.avgTurnaroundTime} ms</dd>
+                    </div>
+                    <div className="flex justify-between gap-3">
+                      <dt className="text-slate-500">CPU utilisation</dt>
+                      <dd className="text-amber-300">{comparison.cpuUtilization}%</dd>
+                    </div>
+                  </dl>
                 </div>
               );
             })}
           </div>
-        </div>
+        </section>
       )}
 
-      {/* Collapsible Execution Logs */}
-      <div className="border border-slate-800 rounded-lg overflow-hidden bg-slate-900/60">
+      <section className="overflow-hidden rounded-lg border border-slate-800 bg-slate-900/60">
         <button
-          onClick={() => setShowLogs(!showLogs)}
-          className="w-full px-4 py-2.5 flex items-center justify-between text-xs font-medium text-slate-400 hover:text-slate-200 transition-colors"
+          type="button"
+          onClick={() => setShowLogs((value) => !value)}
+          aria-expanded={showLogs}
+          className="flex w-full items-center justify-between px-4 py-3 text-xs font-medium text-slate-400 transition-colors hover:text-slate-200"
         >
-          <span>Execution Step-by-Step Kernel Trace ({result.executionLogs.length} events)</span>
-          <span className="text-indigo-400">{showLogs ? 'Collapse' : 'Expand Trace Logs'}</span>
+          <span>Simulation log ({result.executionLogs.length} entries)</span>
+          <span className="text-indigo-400">{showLogs ? 'Hide' : 'Show'}</span>
         </button>
         {showLogs && (
-          <div className="p-4 border-t border-slate-800 bg-slate-950 font-mono text-xs text-slate-300 max-h-56 overflow-y-auto space-y-1">
+          <div className="max-h-56 space-y-1 overflow-y-auto border-t border-slate-800 bg-slate-950 p-4 font-mono text-xs leading-relaxed text-slate-300">
             {result.executionLogs.map((log, index) => (
-              <div key={index} className="leading-relaxed">
-                {log}
-              </div>
+              <p key={index}>{log}</p>
             ))}
           </div>
         )}
-      </div>
+      </section>
     </div>
   );
 };

@@ -1,11 +1,11 @@
 import { BankersState, Process, StudentReportInfo } from '../types/os';
 
 export const DEFAULT_PROCESSES: Process[] = [
-  { id: 'P1', arrivalTime: 0, burstTime: 5, priority: 3, color: '#3b82f6' }, // blue
-  { id: 'P2', arrivalTime: 1, burstTime: 3, priority: 1, color: '#10b981' }, // emerald
-  { id: 'P3', arrivalTime: 2, burstTime: 8, priority: 4, color: '#f59e0b' }, // amber
-  { id: 'P4', arrivalTime: 3, burstTime: 6, priority: 2, color: '#8b5cf6' }, // purple
-  { id: 'P5', arrivalTime: 4, burstTime: 4, priority: 5, color: '#ec4899' }, // pink
+  { id: 'P1', arrivalTime: 0, burstTime: 5, priority: 3, color: '#3b82f6' },
+  { id: 'P2', arrivalTime: 1, burstTime: 3, priority: 1, color: '#10b981' },
+  { id: 'P3', arrivalTime: 2, burstTime: 8, priority: 4, color: '#f59e0b' },
+  { id: 'P4', arrivalTime: 3, burstTime: 6, priority: 2, color: '#8b5cf6' },
+  { id: 'P5', arrivalTime: 4, burstTime: 4, priority: 5, color: '#ec4899' },
 ];
 
 export const DEFAULT_PAGE_REFERENCE_STRING: number[] = [7, 0, 1, 2, 0, 3, 0, 4, 2, 3, 0, 3, 2, 1, 2, 0, 1, 7, 0, 1];
@@ -20,18 +20,18 @@ export const DEFAULT_BANKERS_STATE: BankersState = {
   resourceCount: 3,
   resourceNames: ['A', 'B', 'C'],
   allocation: [
-    [0, 1, 0], // P0
-    [2, 0, 0], // P1
-    [3, 0, 2], // P2
-    [2, 1, 1], // P3
-    [0, 0, 2], // P4
+    [0, 1, 0],
+    [2, 0, 0],
+    [3, 0, 2],
+    [2, 1, 1],
+    [0, 0, 2],
   ],
   max: [
-    [7, 5, 3], // P0
-    [3, 2, 2], // P1
-    [9, 0, 2], // P2
-    [2, 2, 2], // P3
-    [4, 3, 3], // P4
+    [7, 5, 3],
+    [3, 2, 2],
+    [9, 0, 2],
+    [2, 2, 2],
+    [4, 3, 3],
   ],
   need: [
     [7, 4, 3],
@@ -44,15 +44,15 @@ export const DEFAULT_BANKERS_STATE: BankersState = {
 };
 
 export const DEFAULT_STUDENT_INFO: StudentReportInfo = {
-  projectTitle: 'Simulation, Comparative Analysis, and Benchmarking of Core Operating System Algorithms',
+  projectTitle: 'Operating System Algorithms: Simulator and Lab Report',
   studentName: 'Shreyash Dalvi',
-  rollNumber: 'CS-2024-042',
-  department: 'Department of Computer Science & Engineering',
-  collegeName: 'National Institute of Engineering & Technology',
+  rollNumber: 'Add your roll number',
+  department: 'Computer Engineering',
+  collegeName: 'Add your college name',
   courseCode: 'CS-304',
   courseName: 'Operating Systems Laboratory',
-  academicYear: '2025 - 2026',
-  guideName: 'Prof. Anjali Sharma',
+  academicYear: '2026 - 2027',
+  guideName: "Add your guide's name",
   submissionDate: new Date().toISOString().split('T')[0],
-  additionalNotes: 'Mini project submitted towards partial fulfillment for bachelor’s degree in Computer Engineering.',
+  additionalNotes: 'Submitted as part of the Operating Systems laboratory course.',
 };

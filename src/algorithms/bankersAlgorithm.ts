@@ -117,13 +117,17 @@ export function evaluateResourceRequest(
   const { resourceCount, allocation, max, available } = state;
   const pId = `P${processIndex}`;
 
+  const need = Array.from(
+    { length: resourceCount },
+    (_, j) => max[processIndex][j] - allocation[processIndex][j]
+  );
+
   // 1. Check if Request <= Need
   for (let j = 0; j < resourceCount; j++) {
-    const need = max[processIndex][j] - allocation[processIndex][j];
-    if (request[j] > need) {
+    if (request[j] > need[j]) {
       return {
         allowed: false,
-        message: `Error: Process ${pId} requested [${request.join(', ')}] which exceeds its maximum declared need of [${need}] for resource ${state.resourceNames[j]}.`,
+        message: `${pId} asks for [${request.join(', ')}], but its remaining need is only [${need.join(', ')}]. A process cannot request more than it declared in Max.`,
       };
     }
   }
@@ -133,7 +137,7 @@ export function evaluateResourceRequest(
     if (request[j] > available[j]) {
       return {
         allowed: false,
-        message: `Process ${pId} must wait: Request [${request.join(', ')}] exceeds currently available resources [${available.join(', ')}].`,
+        message: `The request [${request.join(', ')}] is larger than the resources available right now [${available.join(', ')}]. ${pId} has to wait until other processes release some.`,
       };
     }
   }
@@ -158,13 +162,13 @@ export function evaluateResourceRequest(
   if (safetyResult.isSafe) {
     return {
       allowed: true,
-      message: `Request for ${pId} [${request.join(', ')}] can be safely granted immediately! Resulting safe sequence: < ${safetyResult.safeSequence.join(' -> ')} >`,
+      message: `Granting [${request.join(', ')}] to ${pId} leaves a safe order: ${safetyResult.safeSequence.join(' -> ')}.`,
       tentativeResult: safetyResult,
     };
   } else {
     return {
       allowed: false,
-      message: `Request for ${pId} [${request.join(', ')}] is REJECTED. Granting it leads to an unsafe state (potential deadlock). Process must wait.`,
+      message: `Granting [${request.join(', ')}] to ${pId} would leave no safe order, so the request is refused and the process waits.`,
       tentativeResult: safetyResult,
     };
   }
