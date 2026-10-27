@@ -489,12 +489,6 @@ export const DiskSchedulingView: React.FC<DiskSchedulingViewProps> = ({
                     <td className="px-2 py-2 font-semibold text-accent">+{step.distance}</td>
                   </tr>
                 ))}
-                <tr className="border-t border-rule-strong bg-well font-semibold">
-                  <td colSpan={3} className="px-2 py-2 text-right text-[11px] font-medium text-ink-muted">
-                    Total
-                  </td>
-                  <td className="px-2 py-2 font-mono text-sm text-good">{result.totalHeadMovement}</td>
-                </tr>
               </tbody>
             </table>
           </div>
@@ -541,11 +535,11 @@ export const DiskSchedulingView: React.FC<DiskSchedulingViewProps> = ({
                   <dl className="mt-2.5 space-y-1 font-mono text-xs">
                     <div className="flex justify-between gap-3">
                       <dt className="text-ink-muted">Head movement</dt>
-                      <dd className="font-semibold text-accent">{comparison.totalHeadMovement} cyl</dd>
+                      <dd className="font-semibold text-ink">{comparison.totalHeadMovement} cyl</dd>
                     </div>
                     <div className="flex justify-between gap-3">
                       <dt className="text-ink-muted">Average seek</dt>
-                      <dd className="text-good">{comparison.avgSeekLength} cyl</dd>
+                      <dd className="text-ink-soft">{comparison.avgSeekLength} cyl</dd>
                     </div>
                   </dl>
                 </div>

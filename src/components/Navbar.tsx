@@ -1,6 +1,6 @@
 import React from 'react';
 import { AlgorithmModule } from '../types/os';
-import { HelpCircle, RotateCcw, FileText } from 'lucide-react';
+import { HelpCircle, RotateCcw } from 'lucide-react';
 
 interface NavbarProps {
   activeModule: AlgorithmModule;
@@ -14,7 +14,7 @@ const NAV_ITEMS: { id: AlgorithmModule; label: string; shortLabel: string }[] = 
   { id: 'page', label: 'Page replacement', shortLabel: 'Pages' },
   { id: 'disk', label: 'Disk scheduling', shortLabel: 'Disk' },
   { id: 'banker', label: 'Deadlock avoidance', shortLabel: 'Deadlock' },
-  { id: 'report', label: 'Project report', shortLabel: 'Report' },
+  { id: 'report', label: 'Report', shortLabel: 'Report' },
 ];
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -89,16 +89,6 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
               <span>Reset</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => onSelectModule('report')}
-              className="flex items-center gap-2 border border-accent bg-accent px-3 py-2 text-xs font-medium text-sheet transition-colors hover:bg-accent-strong"
-            >
-              <FileText className="h-4 w-4" aria-hidden="true" />
-              <span className="hidden sm:inline">Project report</span>
-              <span className="sm:hidden">Report</span>
             </button>
           </div>
         </div>

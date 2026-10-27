@@ -15,7 +15,7 @@ browser's local storage.
 | Page replacement | Runs FIFO, LRU, OPT and LFU on a reference string. The frame grid shows every step, including evictions, and there are presets for Belady's anomaly and a high-locality trace. |
 | Disk scheduling | Runs FCFS, SSTF, SCAN, C-SCAN, LOOK and C-LOOK. Plots the arm path and lists the seek distance for each movement. |
 | Deadlock avoidance | Banker's safety algorithm with editable process count, resource types, allocation and max matrices. The request tester can apply a safe request. |
-| Report | Cover details, policy comparison tables, mathematical definitions, safety table and a sign-off block. Print to PDF, or export Markdown/JSON. |
+| Report | Cover details, policy comparison tables, formulas, safety table and a conclusion. Print to PDF, or export Markdown/JSON. |
 
 ## Running locally
 
@@ -32,6 +32,7 @@ Other scripts:
 
 ```bash
 npm run lint     # TypeScript check
+npm test         # algorithm and validation tests
 npm run build    # type check + production build into dist/
 npm run preview  # serve the production build
 ```
@@ -51,6 +52,7 @@ npm run preview  # serve the production build
 ```
 src/
   algorithms/     pure simulation code, no React
+  algorithms/__tests__/  unit tests for the four engines
   components/     one view per module plus the navbar and quick guide
   types/          shared TypeScript types
   utils/          example inputs

@@ -54,11 +54,6 @@ export const CpuSchedulingView: React.FC<CpuSchedulingViewProps> = ({
     return [...comparisonResults].sort((a, b) => a.result.avgWaitingTime - b.result.avgWaitingTime)[0];
   }, [comparisonResults]);
 
-  const maxWaitingTime = useMemo(
-    () => Math.max(1, ...comparisonResults.map((item) => item.result.avgWaitingTime)),
-    [comparisonResults]
-  );
-
   const activeHint = ALGORITHMS.find((algo) => algo.id === selectedAlgo)?.hint;
 
   const handleAddProcess = () => {
@@ -431,14 +426,6 @@ export const CpuSchedulingView: React.FC<CpuSchedulingViewProps> = ({
                   <td className="px-3 py-2.5 text-ink-soft">{metric.responseTime}</td>
                 </tr>
               ))}
-              <tr className="border-t border-rule-strong bg-well font-semibold">
-                <td colSpan={5} className="px-3 py-3 text-right text-[11px] font-medium text-ink-muted">
-                  Averages
-                </td>
-                <td className="px-3 py-3 font-mono text-sm text-good">{result.avgTurnaroundTime} ms</td>
-                <td className="px-3 py-3 font-mono text-sm text-accent">{result.avgWaitingTime} ms</td>
-                <td className="px-3 py-3 font-mono text-sm text-ink-soft">{result.avgResponseTime} ms</td>
-              </tr>
             </tbody>
           </table>
         </div>
@@ -481,25 +468,18 @@ export const CpuSchedulingView: React.FC<CpuSchedulingViewProps> = ({
                     )}
                   </div>
 
-                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-wash">
-                    <div
-                      className={`h-full rounded-full ${isBest ? 'bg-good' : 'bg-accent-strong'}`}
-                      style={{ width: `${Math.max(4, (comparison.avgWaitingTime / maxWaitingTime) * 100)}%` }}
-                    />
-                  </div>
-
                   <dl className="mt-2.5 space-y-1 font-mono text-xs">
                     <div className="flex justify-between gap-3">
                       <dt className="text-ink-muted">Average waiting</dt>
-                      <dd className="font-semibold text-accent">{comparison.avgWaitingTime} ms</dd>
+                      <dd className="font-semibold text-ink">{comparison.avgWaitingTime} ms</dd>
                     </div>
                     <div className="flex justify-between gap-3">
                       <dt className="text-ink-muted">Average turnaround</dt>
-                      <dd className="text-good">{comparison.avgTurnaroundTime} ms</dd>
+                      <dd className="text-ink-soft">{comparison.avgTurnaroundTime} ms</dd>
                     </div>
                     <div className="flex justify-between gap-3">
                       <dt className="text-ink-muted">CPU utilisation</dt>
-                      <dd className="text-warn">{comparison.cpuUtilization}%</dd>
+                      <dd className="text-ink-soft">{comparison.cpuUtilization}%</dd>
                     </div>
                   </dl>
                 </div>

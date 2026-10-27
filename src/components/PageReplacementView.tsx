@@ -20,7 +20,7 @@ const ALGORITHMS: { id: PageAlgorithm; label: string; hint: string }[] = [
     label: 'Optimal',
     hint: 'Replaces the page that will not be needed for the longest time. It uses future knowledge, so it is a benchmark, not a real policy.',
   },
-  { id: 'LFU', label: 'LFU', hint: 'Replaces the page that has been used least often.' },
+  { id: 'LFU', label: 'LFU', hint: 'Replaces the page used least often; ties go to the page that has been in memory longest.' },
 ];
 
 const FRAME_OPTIONS = [2, 3, 4, 5, 6];
@@ -441,15 +441,15 @@ export const PageReplacementView: React.FC<PageReplacementViewProps> = ({
                   <dl className="mt-2.5 space-y-1 font-mono text-xs">
                     <div className="flex justify-between gap-3">
                       <dt className="text-ink-muted">Faults</dt>
-                      <dd className="font-semibold text-bad">{comparison.totalFaults}</dd>
+                      <dd className="font-semibold text-ink">{comparison.totalFaults}</dd>
                     </div>
                     <div className="flex justify-between gap-3">
                       <dt className="text-ink-muted">Hits</dt>
-                      <dd className="text-good">{comparison.totalHits}</dd>
+                      <dd className="text-ink-soft">{comparison.totalHits}</dd>
                     </div>
                     <div className="flex justify-between gap-3">
                       <dt className="text-ink-muted">Hit rate</dt>
-                      <dd className="text-accent">{comparison.hitRatio}%</dd>
+                      <dd className="text-ink-soft">{comparison.hitRatio}%</dd>
                     </div>
                   </dl>
                 </div>

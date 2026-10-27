@@ -5,9 +5,7 @@ import {
   CpuSchedulingResult,
   DiskAlgorithm,
   DiskDirection,
-  DiskSchedulingResult,
   PageAlgorithm,
-  PageReplacementResult,
   Process,
   StudentReportInfo,
 } from '../types/os';
@@ -110,10 +108,6 @@ export const ProjectReportView: React.FC<ProjectReportViewProps> = ({
     [cpuComparisons]
   );
 
-  const pageResult: PageReplacementResult = useMemo(
-    () => simulatePageReplacement(pageReferenceString, frameCount, 'FIFO'),
-    [pageReferenceString, frameCount]
-  );
   const pageComparisons = useMemo(() => {
     const algos: PageAlgorithm[] = ['FIFO', 'LRU', 'OPT', 'LFU'];
     return algos.map((algo) => ({
@@ -127,10 +121,6 @@ export const ProjectReportView: React.FC<ProjectReportViewProps> = ({
     [pageComparisons]
   );
 
-  const diskResult: DiskSchedulingResult = useMemo(
-    () => simulateDiskScheduling(diskRequests, diskInitialHead, diskMaxCylinder, diskDirection, 'FCFS'),
-    [diskRequests, diskInitialHead, diskMaxCylinder, diskDirection]
-  );
   const diskComparisons = useMemo(() => {
     const algos: DiskAlgorithm[] = ['FCFS', 'SSTF', 'SCAN', 'C-SCAN', 'LOOK', 'C-LOOK'];
     return algos.map((algo) => ({
@@ -649,7 +639,7 @@ Date: ${reportDate}
           <p className="text-xs leading-relaxed text-ink-soft print:text-ink-soft">
             FIFO is compared above using the full step-by-step grid in the simulator. Optimal replacement is
             a theoretical lower bound because it uses future references; LRU is the practical approximation
-            used by most systems.
+            used by most systems. LFU breaks frequency ties by evicting the page that has been in memory longest.
           </p>
         </section>
 
@@ -693,7 +683,8 @@ Date: ${reportDate}
 
           <p className="text-xs leading-relaxed text-ink-soft print:text-ink-soft">
             <strong>{bestDisk.name}</strong> covers the shortest total distance for this queue
-            ({bestDisk.result.totalHeadMovement} cylinders). The step-by-step path is available in the disk
+            ({bestDisk.result.totalHeadMovement} cylinders). SCAN and C-SCAN count travel to the disk edge;
+            LOOK and C-LOOK turn at the last pending request. The step-by-step path is available in the disk
             module.
           </p>
         </section>
@@ -797,23 +788,6 @@ Date: ${reportDate}
           </ul>
         </section>
 
-        <footer className="space-y-6 border-t border-dashed border-rule-strong pt-6 print:border-rule-strong">
-          <div className="grid grid-cols-1 gap-8 text-xs sm:grid-cols-2">
-            <div>
-              <span className="block text-[11px] text-ink-muted print:text-ink-muted">Submitted by</span>
-              <div className="mt-8 border-t border-rule-strong pt-2 font-semibold print:border-black">
-                {studentInfo.studentName} ({studentInfo.rollNumber})
-              </div>
-            </div>
-            <div>
-              <span className="block text-[11px] text-ink-muted print:text-ink-muted">Evaluated by</span>
-              <div className="mt-8 flex justify-between border-t border-rule-strong pt-2 font-semibold print:border-black">
-                <span>{studentInfo.guideName}</span>
-                <span className="font-mono font-normal text-ink-muted print:text-ink-muted">Marks: ______</span>
-              </div>
-            </div>
-          </div>
-        </footer>
       </article>
     </div>
   );

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   AlgorithmModule,
   BankersState,
@@ -333,13 +333,6 @@ export default function App() {
               className="hover:text-ink hover:underline"
             >
               Quick guide
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveModule('report')}
-              className="text-accent hover:text-accent-strong hover:underline"
-            >
-              Open project report
             </button>
           </div>
         </div>
