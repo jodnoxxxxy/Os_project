@@ -65,13 +65,13 @@ interface FieldProps {
 
 const Field: React.FC<FieldProps> = ({ label, value, onChange, type = 'text', placeholder, wide }) => (
   <label className={wide ? 'sm:col-span-2' : undefined}>
-    <span className="mb-1 block text-xs text-slate-400">{label}</span>
+    <span className="mb-1 block text-xs text-ink-muted">{label}</span>
     <input
       type={type}
       value={value}
       placeholder={placeholder}
       onChange={(event) => onChange(event.target.value)}
-      className="w-full rounded border border-slate-700 bg-slate-950 px-2.5 py-1.5 text-xs text-slate-100 placeholder:text-slate-600 focus:border-indigo-500 focus:outline-none"
+      className="w-full rounded border border-rule-strong bg-well px-2.5 py-1.5 text-xs text-ink placeholder:text-ink-faint focus:border-accent focus:outline-none"
     />
   </label>
 );
@@ -295,15 +295,15 @@ Date: ${reportDate}
 
   return (
     <div className="space-y-6">
-      <div className="no-print rounded-lg border border-slate-800 bg-slate-900 p-4">
+      <div className="no-print rounded-lg border border-rule bg-sheet p-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-xs font-medium text-indigo-400">Report</p>
-            <h1 className="mt-1 flex items-center gap-2 text-xl font-semibold text-slate-100">
-              <FileText className="h-5 w-5 text-indigo-400" aria-hidden="true" />
+            <p className="text-xs font-medium text-accent">Report</p>
+            <h1 className="mt-1 flex items-center gap-2 text-xl font-semibold text-ink">
+              <FileText className="h-5 w-5 text-accent" aria-hidden="true" />
               Project report
             </h1>
-            <p className="mt-1 text-sm text-slate-400">
+            <p className="mt-1 text-sm text-ink-muted">
               Built from the inputs currently loaded in the four simulators. Add your details, then print or export.
             </p>
           </div>
@@ -313,21 +313,21 @@ Date: ${reportDate}
               type="button"
               onClick={() => setIsEditingInfo((value) => !value)}
               aria-expanded={isEditingInfo}
-              className="flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-200 transition-colors hover:bg-slate-700"
+              className="flex items-center gap-1.5 rounded-md border border-rule-strong bg-wash px-3 py-1.5 text-xs font-medium text-ink transition-colors hover:bg-rule"
             >
-              <Edit3 className="h-3.5 w-3.5 text-indigo-400" aria-hidden="true" />
+              <Edit3 className="h-3.5 w-3.5 text-accent" aria-hidden="true" />
               {isEditingInfo ? 'Close details' : 'Edit details'}
             </button>
 
             <button
               type="button"
               onClick={handleCopyMarkdown}
-              className="flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-200 transition-colors hover:bg-slate-700"
+              className="flex items-center gap-1.5 rounded-md border border-rule-strong bg-wash px-3 py-1.5 text-xs font-medium text-ink transition-colors hover:bg-rule"
             >
               {copyState === 'copied' ? (
-                <Check className="h-3.5 w-3.5 text-emerald-400" aria-hidden="true" />
+                <Check className="h-3.5 w-3.5 text-good" aria-hidden="true" />
               ) : (
-                <Copy className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
+                <Copy className="h-3.5 w-3.5 text-ink-muted" aria-hidden="true" />
               )}
               {copyState === 'copied' ? 'Copied' : copyState === 'error' ? 'Copy failed' : 'Copy Markdown'}
             </button>
@@ -335,25 +335,25 @@ Date: ${reportDate}
             <button
               type="button"
               onClick={handleDownloadMarkdown}
-              className="flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-200 transition-colors hover:bg-slate-700"
+              className="flex items-center gap-1.5 rounded-md border border-rule-strong bg-wash px-3 py-1.5 text-xs font-medium text-ink transition-colors hover:bg-rule"
             >
-              <Download className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
+              <Download className="h-3.5 w-3.5 text-ink-muted" aria-hidden="true" />
               Markdown
             </button>
 
             <button
               type="button"
               onClick={handleDownloadJson}
-              className="flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-200 transition-colors hover:bg-slate-700"
+              className="flex items-center gap-1.5 rounded-md border border-rule-strong bg-wash px-3 py-1.5 text-xs font-medium text-ink transition-colors hover:bg-rule"
             >
-              <Download className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
+              <Download className="h-3.5 w-3.5 text-ink-muted" aria-hidden="true" />
               JSON
             </button>
 
             <button
               type="button"
               onClick={() => window.print()}
-              className="flex items-center gap-1.5 rounded-md bg-indigo-600 px-4 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-indigo-500"
+              className="flex items-center gap-1.5 rounded-md bg-accent px-4 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-accent-strong"
             >
               <Printer className="h-4 w-4" aria-hidden="true" />
               Print / PDF
@@ -363,10 +363,10 @@ Date: ${reportDate}
       </div>
 
       {isEditingInfo && (
-        <section className="no-print space-y-4 rounded-lg border border-indigo-500/30 bg-slate-900 p-5">
+        <section className="no-print space-y-4 rounded-lg border border-accent/30 bg-sheet p-5">
           <div>
-            <h2 className="text-sm font-semibold text-indigo-300">Cover details</h2>
-            <p className="mt-0.5 text-xs text-slate-500">
+            <h2 className="text-sm font-semibold text-accent">Cover details</h2>
+            <p className="mt-0.5 text-xs text-ink-muted">
               These values only change the report. They are saved in this browser.
             </p>
           </div>
@@ -429,106 +429,106 @@ Date: ${reportDate}
           </div>
 
           <label>
-            <span className="mb-1 block text-xs text-slate-400">Additional notes (optional)</span>
+            <span className="mb-1 block text-xs text-ink-muted">Additional notes (optional)</span>
             <textarea
               rows={3}
               value={studentInfo.additionalNotes}
               onChange={(event) => onUpdateStudentInfo({ ...studentInfo, additionalNotes: event.target.value })}
-              className="w-full rounded border border-slate-700 bg-slate-950 px-2.5 py-1.5 text-xs leading-relaxed text-slate-100 focus:border-indigo-500 focus:outline-none"
+              className="w-full rounded border border-rule-strong bg-well px-2.5 py-1.5 text-xs leading-relaxed text-ink focus:border-accent focus:outline-none"
             />
           </label>
         </section>
       )}
 
-      <article className="print-card mx-auto max-w-5xl space-y-8 rounded-xl border border-slate-800 bg-slate-900 p-6 text-slate-200 shadow-xl sm:p-10 print:text-slate-900">
-        <header className="space-y-3 border-b-2 border-slate-700 pb-6 text-center print:border-slate-800">
-          <p className="text-xs font-semibold uppercase tracking-wider text-indigo-400 print:text-indigo-900">
+      <article className="print-card mx-auto max-w-5xl space-y-8 rounded-xl border border-rule bg-sheet p-6 text-ink shadow-xl sm:p-10 print:text-ink">
+        <header className="space-y-3 border-b-2 border-rule-strong pb-6 text-center print:border-rule">
+          <p className="text-xs font-semibold uppercase tracking-wider text-accent print:text-accent">
             Operating Systems Laboratory · Mini Project
           </p>
-          <h2 className="mx-auto max-w-3xl text-2xl font-bold tracking-tight text-slate-100 print:text-black sm:text-3xl">
+          <h2 className="mx-auto max-w-3xl text-2xl font-bold tracking-tight text-ink print:text-black sm:text-3xl">
             {studentInfo.projectTitle}
           </h2>
-          <p className="text-sm text-slate-300 print:text-slate-800">
+          <p className="text-sm text-ink-soft print:text-ink-soft">
             {studentInfo.department}, {studentInfo.collegeName}
           </p>
 
-          <dl className="mt-4 grid grid-cols-2 gap-3 rounded-lg border border-slate-800 bg-slate-950/70 p-4 text-left text-xs print:border-slate-300 print:bg-slate-50 sm:grid-cols-4">
+          <dl className="mt-4 grid grid-cols-2 gap-3 rounded-lg border border-rule bg-well p-4 text-left text-xs print:border-rule print:bg-sheet sm:grid-cols-4">
             <div>
-              <dt className="text-[11px] text-slate-400 print:text-slate-600">Student</dt>
-              <dd className="mt-0.5 font-semibold text-slate-100 print:text-slate-900">{studentInfo.studentName}</dd>
+              <dt className="text-[11px] text-ink-muted print:text-ink-muted">Student</dt>
+              <dd className="mt-0.5 font-semibold text-ink print:text-ink">{studentInfo.studentName}</dd>
             </div>
             <div>
-              <dt className="text-[11px] text-slate-400 print:text-slate-600">Roll / PRN</dt>
-              <dd className="mt-0.5 font-semibold text-slate-100 print:text-slate-900">{studentInfo.rollNumber}</dd>
+              <dt className="text-[11px] text-ink-muted print:text-ink-muted">Roll / PRN</dt>
+              <dd className="mt-0.5 font-semibold text-ink print:text-ink">{studentInfo.rollNumber}</dd>
             </div>
             <div>
-              <dt className="text-[11px] text-slate-400 print:text-slate-600">Course</dt>
-              <dd className="mt-0.5 font-semibold text-slate-100 print:text-slate-900">
+              <dt className="text-[11px] text-ink-muted print:text-ink-muted">Course</dt>
+              <dd className="mt-0.5 font-semibold text-ink print:text-ink">
                 {studentInfo.courseCode} · {studentInfo.courseName}
               </dd>
             </div>
             <div>
-              <dt className="text-[11px] text-slate-400 print:text-slate-600">Submitted</dt>
-              <dd className="mt-0.5 font-semibold text-slate-100 print:text-slate-900">{reportDate}</dd>
+              <dt className="text-[11px] text-ink-muted print:text-ink-muted">Submitted</dt>
+              <dd className="mt-0.5 font-semibold text-ink print:text-ink">{reportDate}</dd>
             </div>
             <div>
-              <dt className="text-[11px] text-slate-400 print:text-slate-600">Guide</dt>
-              <dd className="mt-0.5 font-semibold text-slate-100 print:text-slate-900">{studentInfo.guideName}</dd>
+              <dt className="text-[11px] text-ink-muted print:text-ink-muted">Guide</dt>
+              <dd className="mt-0.5 font-semibold text-ink print:text-ink">{studentInfo.guideName}</dd>
             </div>
             <div>
-              <dt className="text-[11px] text-slate-400 print:text-slate-600">Academic year</dt>
-              <dd className="mt-0.5 font-semibold text-slate-100 print:text-slate-900">{studentInfo.academicYear}</dd>
+              <dt className="text-[11px] text-ink-muted print:text-ink-muted">Academic year</dt>
+              <dd className="mt-0.5 font-semibold text-ink print:text-ink">{studentInfo.academicYear}</dd>
             </div>
           </dl>
         </header>
 
         <section className="space-y-3 avoid-break">
-          <h3 className="border-b border-slate-800 pb-1 text-base font-semibold text-indigo-400 print:border-slate-300 print:text-indigo-900">
+          <h3 className="border-b border-rule pb-1 text-base font-semibold text-accent print:border-rule print:text-accent">
             1. Abstract
           </h3>
-          <p className="text-xs leading-relaxed text-slate-300 print:text-slate-800">
+          <p className="text-xs leading-relaxed text-ink-soft print:text-ink-soft">
             This report covers four classic operating system decisions: CPU scheduling, page replacement,
             disk scheduling and deadlock avoidance. Each section uses the workload entered in the simulator,
             compares the available policies, and records the result. The numbers below are generated from the
             current inputs, so they can be reproduced by opening the app again.
           </p>
           {studentInfo.additionalNotes && (
-            <p className="rounded border border-slate-800 bg-slate-950/60 p-3 text-xs leading-relaxed text-slate-300 print:border-slate-300 print:bg-slate-50 print:text-slate-800">
+            <p className="rounded border border-rule bg-well p-3 text-xs leading-relaxed text-ink-soft print:border-rule print:bg-sheet print:text-ink-soft">
               {studentInfo.additionalNotes}
             </p>
           )}
         </section>
 
         <section className="space-y-4 avoid-break">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-1 print:border-slate-300">
-            <h3 className="flex items-center gap-2 text-base font-semibold text-indigo-400 print:text-indigo-900">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-rule pb-1 print:border-rule">
+            <h3 className="flex items-center gap-2 text-base font-semibold text-accent print:text-accent">
               <Cpu className="h-4 w-4" aria-hidden="true" />
               2. CPU scheduling
             </h3>
-            <span className="font-mono text-xs text-emerald-400 print:text-emerald-800">
+            <span className="font-mono text-xs text-good print:text-good">
               Lowest average waiting time: {bestCpu.name} ({bestCpu.result.avgWaitingTime} ms)
             </span>
           </div>
 
-          <p className="text-xs leading-relaxed text-slate-300 print:text-slate-800">
+          <p className="text-xs leading-relaxed text-ink-soft print:text-ink-soft">
             Waiting time is the time a process spends ready but not running (TAT − burst). Turnaround time is
             completion minus arrival (CT − AT). Lower is better for both.
           </p>
 
           <div>
-            <p className="mb-1 text-xs font-semibold text-slate-300 print:text-slate-800">
+            <p className="mb-1 text-xs font-semibold text-ink-soft print:text-ink-soft">
               Table 2.1: Process workload
             </p>
-            <table className="w-full border-collapse border border-slate-800 text-left text-xs font-mono print:border-slate-400">
+            <table className="w-full border-collapse border border-rule text-left text-xs font-mono print:border-rule-strong">
               <thead>
-                <tr className="border-b border-slate-800 bg-slate-950 print:border-slate-400 print:bg-slate-100">
+                <tr className="border-b border-rule bg-well print:border-rule-strong print:bg-well">
                   <th scope="col" className="px-3 py-1.5 font-medium">Process</th>
                   <th scope="col" className="px-3 py-1.5 font-medium">Arrival</th>
                   <th scope="col" className="px-3 py-1.5 font-medium">Burst</th>
                   <th scope="col" className="px-3 py-1.5 font-medium">Priority</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800 print:divide-slate-300">
+              <tbody className="divide-y divide-rule print:divide-rule">
                 {processes.map((process) => (
                   <tr key={process.id}>
                     <td className="px-3 py-1 font-semibold">{process.id}</td>
@@ -542,10 +542,10 @@ Date: ${reportDate}
           </div>
 
           <div>
-            <p className="mb-1 text-xs font-semibold text-slate-300 print:text-slate-800">
+            <p className="mb-1 text-xs font-semibold text-ink-soft print:text-ink-soft">
               Figure 2.1: FCFS timeline ({cpuResult.totalTime} ms)
             </p>
-            <div className="flex h-8 w-full overflow-hidden rounded border border-slate-700 font-mono text-xs print:border-black">
+            <div className="flex h-8 w-full overflow-hidden rounded border border-rule-strong font-mono text-xs print:border-black">
               {cpuResult.ganttChart.map((segment, index) => (
                 <div
                   key={index}
@@ -554,10 +554,10 @@ Date: ${reportDate}
                     flexBasis: 0,
                     minWidth: 14,
                   }}
-                  className={`flex h-full items-center justify-center border-r border-slate-900 print:border-black ${
+                  className={`flex h-full items-center justify-center border-r border-rule print:border-black ${
                     segment.processId === 'IDLE'
-                      ? 'bg-slate-800 text-slate-400 print:bg-slate-300 print:text-slate-700'
-                      : 'bg-indigo-600 font-semibold text-white print:bg-slate-200 print:text-black'
+                      ? 'bg-wash text-ink-muted print:bg-rule print:text-ink-soft'
+                      : 'bg-accent font-semibold text-white print:bg-wash print:text-black'
                   }`}
                   title={`${segment.processId}: ${segment.startTime} to ${segment.endTime} ms`}
                 >
@@ -565,31 +565,31 @@ Date: ${reportDate}
                 </div>
               ))}
             </div>
-            <div className="mt-1 flex justify-between font-mono text-[10px] text-slate-400 print:text-slate-600">
+            <div className="mt-1 flex justify-between font-mono text-[10px] text-ink-muted print:text-ink-muted">
               <span>0</span>
               <span>{cpuResult.totalTime} ms</span>
             </div>
           </div>
 
           <div>
-            <p className="mb-1 text-xs font-semibold text-slate-300 print:text-slate-800">
+            <p className="mb-1 text-xs font-semibold text-ink-soft print:text-ink-soft">
               Table 2.2: Policy comparison
             </p>
-            <table className="w-full border-collapse border border-slate-800 text-left text-xs font-mono print:border-slate-400">
+            <table className="w-full border-collapse border border-rule text-left text-xs font-mono print:border-rule-strong">
               <thead>
-                <tr className="border-b border-slate-800 bg-slate-950 print:border-slate-400 print:bg-slate-100">
+                <tr className="border-b border-rule bg-well print:border-rule-strong print:bg-well">
                   <th scope="col" className="px-3 py-1.5 font-medium">Policy</th>
                   <th scope="col" className="px-3 py-1.5 font-medium">Average waiting</th>
                   <th scope="col" className="px-3 py-1.5 font-medium">Average turnaround</th>
                   <th scope="col" className="px-3 py-1.5 font-medium">CPU utilisation</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800 print:divide-slate-300">
+              <tbody className="divide-y divide-rule print:divide-rule">
                 {cpuComparisons.map((item) => (
-                  <tr key={item.algo} className={item.algo === bestCpu.algo ? 'bg-indigo-950/20 font-semibold print:bg-slate-200' : ''}>
+                  <tr key={item.algo} className={item.algo === bestCpu.algo ? 'bg-accent-wash font-semibold print:bg-wash' : ''}>
                     <td className="px-3 py-1.5">{item.name}</td>
-                    <td className="px-3 py-1.5 text-indigo-400 print:text-indigo-900">{item.result.avgWaitingTime} ms</td>
-                    <td className="px-3 py-1.5 text-emerald-400 print:text-emerald-900">{item.result.avgTurnaroundTime} ms</td>
+                    <td className="px-3 py-1.5 text-accent print:text-accent">{item.result.avgWaitingTime} ms</td>
+                    <td className="px-3 py-1.5 text-good print:text-good">{item.result.avgTurnaroundTime} ms</td>
                     <td className="px-3 py-1.5">{item.result.cpuUtilization}%</td>
                   </tr>
                 ))}
@@ -597,7 +597,7 @@ Date: ${reportDate}
             </table>
           </div>
 
-          <p className="text-xs leading-relaxed text-slate-300 print:text-slate-800">
+          <p className="text-xs leading-relaxed text-ink-soft print:text-ink-soft">
             On this workload, <strong>{bestCpu.name}</strong> gives the lowest average waiting time
             ({bestCpu.result.avgWaitingTime} ms). This result depends on the arrival and burst values above;
             changing them can change which policy wins.
@@ -605,27 +605,27 @@ Date: ${reportDate}
         </section>
 
         <section className="space-y-4 avoid-break page-break">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-1 print:border-slate-300">
-            <h3 className="flex items-center gap-2 text-base font-semibold text-indigo-400 print:text-indigo-900">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-rule pb-1 print:border-rule">
+            <h3 className="flex items-center gap-2 text-base font-semibold text-accent print:text-accent">
               <Layers className="h-4 w-4" aria-hidden="true" />
               3. Page replacement
             </h3>
-            <span className="font-mono text-xs text-emerald-400 print:text-emerald-800">
+            <span className="font-mono text-xs text-good print:text-good">
               Fewest faults: {bestPage.name} ({bestPage.result.totalFaults})
             </span>
           </div>
 
-          <p className="text-xs leading-relaxed text-slate-300 print:text-slate-800">
+          <p className="text-xs leading-relaxed text-ink-soft print:text-ink-soft">
             Reference string: [{pageReferenceString.join(', ')}] with {frameCount} physical frames. A fault
             means the page was not in memory and had to be loaded.
           </p>
 
-          <table className="w-full border-collapse border border-slate-800 text-left text-xs font-mono print:border-slate-400">
-            <caption className="mb-1 text-left text-xs font-semibold text-slate-300 print:text-slate-800">
+          <table className="w-full border-collapse border border-rule text-left text-xs font-mono print:border-rule-strong">
+            <caption className="mb-1 text-left text-xs font-semibold text-ink-soft print:text-ink-soft">
               Table 3.1: Policy comparison
             </caption>
             <thead>
-              <tr className="border-b border-slate-800 bg-slate-950 print:border-slate-400 print:bg-slate-100">
+              <tr className="border-b border-rule bg-well print:border-rule-strong print:bg-well">
                 <th scope="col" className="px-3 py-1.5 font-medium">Policy</th>
                 <th scope="col" className="px-3 py-1.5 font-medium">Faults</th>
                 <th scope="col" className="px-3 py-1.5 font-medium">Hits</th>
@@ -633,12 +633,12 @@ Date: ${reportDate}
                 <th scope="col" className="px-3 py-1.5 font-medium">Fault rate</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800 print:divide-slate-300">
+            <tbody className="divide-y divide-rule print:divide-rule">
               {pageComparisons.map((item) => (
-                <tr key={item.algo} className={item.algo === bestPage.algo ? 'bg-indigo-950/20 font-semibold print:bg-slate-200' : ''}>
+                <tr key={item.algo} className={item.algo === bestPage.algo ? 'bg-accent-wash font-semibold print:bg-wash' : ''}>
                   <td className="px-3 py-1.5">{item.name}</td>
-                  <td className="px-3 py-1.5 text-rose-400 print:text-rose-800">{item.result.totalFaults}</td>
-                  <td className="px-3 py-1.5 text-emerald-400 print:text-emerald-800">{item.result.totalHits}</td>
+                  <td className="px-3 py-1.5 text-bad print:text-bad">{item.result.totalFaults}</td>
+                  <td className="px-3 py-1.5 text-good print:text-good">{item.result.totalHits}</td>
                   <td className="px-3 py-1.5">{item.result.hitRatio}%</td>
                   <td className="px-3 py-1.5">{item.result.faultRatio}%</td>
                 </tr>
@@ -646,7 +646,7 @@ Date: ${reportDate}
             </tbody>
           </table>
 
-          <p className="text-xs leading-relaxed text-slate-300 print:text-slate-800">
+          <p className="text-xs leading-relaxed text-ink-soft print:text-ink-soft">
             FIFO is compared above using the full step-by-step grid in the simulator. Optimal replacement is
             a theoretical lower bound because it uses future references; LRU is the practical approximation
             used by most systems.
@@ -654,44 +654,44 @@ Date: ${reportDate}
         </section>
 
         <section className="space-y-4 avoid-break">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-1 print:border-slate-300">
-            <h3 className="flex items-center gap-2 text-base font-semibold text-indigo-400 print:text-indigo-900">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-rule pb-1 print:border-rule">
+            <h3 className="flex items-center gap-2 text-base font-semibold text-accent print:text-accent">
               <HardDrive className="h-4 w-4" aria-hidden="true" />
               4. Disk scheduling
             </h3>
-            <span className="font-mono text-xs text-emerald-400 print:text-emerald-800">
+            <span className="font-mono text-xs text-good print:text-good">
               Shortest path: {bestDisk.name} ({bestDisk.result.totalHeadMovement} cylinders)
             </span>
           </div>
 
-          <p className="text-xs leading-relaxed text-slate-300 print:text-slate-800">
+          <p className="text-xs leading-relaxed text-ink-soft print:text-ink-soft">
             Requests: [{diskRequests.join(', ')}]. The arm starts at cylinder {diskInitialHead} on a disk
             numbered 0 to {diskMaxCylinder}, moving {diskDirection === 'right' ? 'towards the last cylinder' : 'towards cylinder 0'}.
           </p>
 
-          <table className="w-full border-collapse border border-slate-800 text-left text-xs font-mono print:border-slate-400">
-            <caption className="mb-1 text-left text-xs font-semibold text-slate-300 print:text-slate-800">
+          <table className="w-full border-collapse border border-rule text-left text-xs font-mono print:border-rule-strong">
+            <caption className="mb-1 text-left text-xs font-semibold text-ink-soft print:text-ink-soft">
               Table 4.1: Policy comparison
             </caption>
             <thead>
-              <tr className="border-b border-slate-800 bg-slate-950 print:border-slate-400 print:bg-slate-100">
+              <tr className="border-b border-rule bg-well print:border-rule-strong print:bg-well">
                 <th scope="col" className="px-3 py-1.5 font-medium">Policy</th>
                 <th scope="col" className="px-3 py-1.5 font-medium">Total head movement</th>
                 <th scope="col" className="px-3 py-1.5 font-medium">Average seek</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800 print:divide-slate-300">
+            <tbody className="divide-y divide-rule print:divide-rule">
               {diskComparisons.map((item) => (
-                <tr key={item.algo} className={item.algo === bestDisk.algo ? 'bg-indigo-950/20 font-semibold print:bg-slate-200' : ''}>
+                <tr key={item.algo} className={item.algo === bestDisk.algo ? 'bg-accent-wash font-semibold print:bg-wash' : ''}>
                   <td className="px-3 py-1.5">{item.name}</td>
-                  <td className="px-3 py-1.5 text-indigo-400 print:text-indigo-900">{item.result.totalHeadMovement} cyl</td>
+                  <td className="px-3 py-1.5 text-accent print:text-accent">{item.result.totalHeadMovement} cyl</td>
                   <td className="px-3 py-1.5">{item.result.avgSeekLength} cyl/request</td>
                 </tr>
               ))}
             </tbody>
           </table>
 
-          <p className="text-xs leading-relaxed text-slate-300 print:text-slate-800">
+          <p className="text-xs leading-relaxed text-ink-soft print:text-ink-soft">
             <strong>{bestDisk.name}</strong> covers the shortest total distance for this queue
             ({bestDisk.result.totalHeadMovement} cylinders). The step-by-step path is available in the disk
             module.
@@ -699,17 +699,17 @@ Date: ${reportDate}
         </section>
 
         <section className="space-y-4 avoid-break">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-1 print:border-slate-300">
-            <h3 className="flex items-center gap-2 text-base font-semibold text-indigo-400 print:text-indigo-900">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-rule pb-1 print:border-rule">
+            <h3 className="flex items-center gap-2 text-base font-semibold text-accent print:text-accent">
               <ShieldCheck className="h-4 w-4" aria-hidden="true" />
               5. Deadlock avoidance
             </h3>
-            <span className={`font-mono text-xs font-semibold ${bankersResult.isSafe ? 'text-emerald-400 print:text-emerald-800' : 'text-rose-400 print:text-rose-800'}`}>
+            <span className={`font-mono text-xs font-semibold ${bankersResult.isSafe ? 'text-good print:text-good' : 'text-bad print:text-bad'}`}>
               {bankersResult.isSafe ? 'Safe state' : 'Unsafe state'}
             </span>
           </div>
 
-          <p className="text-xs leading-relaxed text-slate-300 print:text-slate-800">
+          <p className="text-xs leading-relaxed text-ink-soft print:text-ink-soft">
             {bankersState.processCount} processes, resource types {bankersState.resourceNames.join(', ')},
             available vector [{bankersState.available.join(', ')}].
             {bankersResult.isSafe
@@ -717,25 +717,25 @@ Date: ${reportDate}
               : ' No process can finish with the resources currently available, so no safe order exists.'}
           </p>
 
-          <table className="w-full border-collapse border border-slate-800 text-center text-xs font-mono print:border-slate-400">
-            <caption className="mb-1 text-left text-xs font-semibold text-slate-300 print:text-slate-800">
+          <table className="w-full border-collapse border border-rule text-center text-xs font-mono print:border-rule-strong">
+            <caption className="mb-1 text-left text-xs font-semibold text-ink-soft print:text-ink-soft">
               Table 5.1: Allocation, maximum claim and remaining need
             </caption>
             <thead>
-              <tr className="border-b border-slate-800 bg-slate-950 print:border-slate-400 print:bg-slate-100">
+              <tr className="border-b border-rule bg-well print:border-rule-strong print:bg-well">
                 <th scope="col" className="px-3 py-1.5 text-left font-medium">Process</th>
                 <th scope="col" className="px-3 py-1.5 font-medium">Allocation [{bankersState.resourceNames.join(', ')}]</th>
                 <th scope="col" className="px-3 py-1.5 font-medium">Max [{bankersState.resourceNames.join(', ')}]</th>
-                <th scope="col" className="px-3 py-1.5 font-medium text-indigo-400 print:text-indigo-900">Need [{bankersState.resourceNames.join(', ')}]</th>
+                <th scope="col" className="px-3 py-1.5 font-medium text-accent print:text-accent">Need [{bankersState.resourceNames.join(', ')}]</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800 print:divide-slate-300">
+            <tbody className="divide-y divide-rule print:divide-rule">
               {Array.from({ length: bankersState.processCount }).map((_, processIndex) => (
                 <tr key={processIndex}>
                   <td className="px-3 py-1 text-left font-semibold">P{processIndex}</td>
                   <td className="px-3 py-1">[{(bankersState.allocation[processIndex] ?? []).join(', ')}]</td>
                   <td className="px-3 py-1">[{(bankersState.max[processIndex] ?? []).join(', ')}]</td>
-                  <td className="px-3 py-1 font-semibold text-indigo-400 print:text-indigo-900">
+                  <td className="px-3 py-1 font-semibold text-accent print:text-accent">
                     [{(bankersResult.needMatrix[processIndex] ?? []).join(', ')}]
                   </td>
                 </tr>
@@ -744,12 +744,12 @@ Date: ${reportDate}
           </table>
 
           {bankersResult.isSafe && bankersResult.steps.length > 0 && (
-            <table className="w-full border-collapse border border-slate-800 text-left text-xs font-mono print:border-slate-400">
-              <caption className="mb-1 text-left text-xs font-semibold text-slate-300 print:text-slate-800">
+            <table className="w-full border-collapse border border-rule text-left text-xs font-mono print:border-rule-strong">
+              <caption className="mb-1 text-left text-xs font-semibold text-ink-soft print:text-ink-soft">
                 Table 5.2: Safety check
               </caption>
               <thead>
-                <tr className="border-b border-slate-800 bg-slate-950 print:border-slate-400 print:bg-slate-100">
+                <tr className="border-b border-rule bg-well print:border-rule-strong print:bg-well">
                   <th scope="col" className="px-3 py-1.5 font-medium">Step</th>
                   <th scope="col" className="px-3 py-1.5 font-medium">Process</th>
                   <th scope="col" className="px-3 py-1.5 font-medium">Work before</th>
@@ -757,14 +757,14 @@ Date: ${reportDate}
                   <th scope="col" className="px-3 py-1.5 font-medium">Work after</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800 print:divide-slate-300">
+              <tbody className="divide-y divide-rule print:divide-rule">
                 {bankersResult.steps.map((step) => (
                   <tr key={step.step}>
                     <td className="px-3 py-1.5">{step.step}</td>
-                    <td className="px-3 py-1.5 font-semibold text-indigo-400 print:text-indigo-900">{step.processId}</td>
+                    <td className="px-3 py-1.5 font-semibold text-accent print:text-accent">{step.processId}</td>
                     <td className="px-3 py-1.5">[{step.workBefore.join(', ')}]</td>
                     <td className="px-3 py-1.5">[{step.need.join(', ')}]</td>
-                    <td className="px-3 py-1.5 text-emerald-400 print:text-emerald-900">[{step.workAfter.join(', ')}]</td>
+                    <td className="px-3 py-1.5 text-good print:text-good">[{step.workAfter.join(', ')}]</td>
                   </tr>
                 ))}
               </tbody>
@@ -773,10 +773,10 @@ Date: ${reportDate}
         </section>
 
         <section className="space-y-3 avoid-break">
-          <h3 className="border-b border-slate-800 pb-1 text-base font-semibold text-indigo-400 print:border-slate-300 print:text-indigo-900">
+          <h3 className="border-b border-rule pb-1 text-base font-semibold text-accent print:border-rule print:text-accent">
             6. Conclusion
           </h3>
-          <ul className="list-inside list-disc space-y-1.5 text-xs leading-relaxed text-slate-300 print:text-slate-800">
+          <ul className="list-inside list-disc space-y-1.5 text-xs leading-relaxed text-ink-soft print:text-ink-soft">
             <li>
               FCFS is easy to implement, but a long job near the front can delay everything behind it. SJF and
               SRTF lower average waiting time when burst times are known in advance, and round robin trades
@@ -797,19 +797,19 @@ Date: ${reportDate}
           </ul>
         </section>
 
-        <footer className="space-y-6 border-t border-dashed border-slate-700 pt-6 print:border-slate-400">
+        <footer className="space-y-6 border-t border-dashed border-rule-strong pt-6 print:border-rule-strong">
           <div className="grid grid-cols-1 gap-8 text-xs sm:grid-cols-2">
             <div>
-              <span className="block text-[11px] text-slate-400 print:text-slate-600">Submitted by</span>
-              <div className="mt-8 border-t border-slate-600 pt-2 font-semibold print:border-black">
+              <span className="block text-[11px] text-ink-muted print:text-ink-muted">Submitted by</span>
+              <div className="mt-8 border-t border-rule-strong pt-2 font-semibold print:border-black">
                 {studentInfo.studentName} ({studentInfo.rollNumber})
               </div>
             </div>
             <div>
-              <span className="block text-[11px] text-slate-400 print:text-slate-600">Evaluated by</span>
-              <div className="mt-8 flex justify-between border-t border-slate-600 pt-2 font-semibold print:border-black">
+              <span className="block text-[11px] text-ink-muted print:text-ink-muted">Evaluated by</span>
+              <div className="mt-8 flex justify-between border-t border-rule-strong pt-2 font-semibold print:border-black">
                 <span>{studentInfo.guideName}</span>
-                <span className="font-mono font-normal text-slate-400 print:text-slate-600">Marks: ______</span>
+                <span className="font-mono font-normal text-ink-muted print:text-ink-muted">Marks: ______</span>
               </div>
             </div>
           </div>

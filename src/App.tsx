@@ -190,7 +190,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#070b14] text-slate-100 flex flex-col">
+    <div className="flex min-h-screen flex-col bg-paper text-ink">
       <Navbar
         activeModule={activeModule}
         onSelectModule={setActiveModule}
@@ -203,7 +203,7 @@ export default function App() {
           <div
             role="status"
             aria-live="polite"
-            className="toast-in fixed bottom-5 right-4 left-4 sm:left-auto z-50 flex items-center gap-4 rounded-lg border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-slate-200 shadow-2xl shadow-black/40 no-print"
+            className="toast-in fixed bottom-5 right-4 left-4 z-50 flex items-center gap-4 rounded-lg border border-rule-strong bg-sheet px-4 py-3 text-sm text-ink shadow-2xl no-print sm:left-auto"
           >
             <span className="flex-1">{toast.message}</span>
             {toast.undo && (
@@ -214,7 +214,7 @@ export default function App() {
                   if (toastTimer.current) window.clearTimeout(toastTimer.current);
                   setToast(null);
                 }}
-                className="rounded-md border border-indigo-500/40 px-2.5 py-1 text-xs font-semibold text-indigo-300 hover:bg-indigo-500/10"
+                className="rounded-md border border-accent px-2.5 py-1 text-xs font-semibold text-accent hover:bg-accent-wash"
               >
                 Undo
               </button>
@@ -223,7 +223,7 @@ export default function App() {
               type="button"
               onClick={() => setToast(null)}
               aria-label="Dismiss message"
-              className="text-slate-500 hover:text-slate-200"
+              className="text-ink-muted hover:text-ink"
             >
               &times;
             </button>
@@ -323,21 +323,21 @@ export default function App() {
         )}
       </main>
 
-      <footer className="border-t border-slate-900 py-4 text-xs text-slate-500 no-print">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <p>OS Lab. Everything runs in your browser, and your inputs are saved on this device.</p>
+      <footer className="border-t border-rule py-5 font-mono text-[11px] text-ink-muted no-print">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-4 sm:flex-row sm:px-6 lg:px-8">
+          <p>OS Lab. Everything runs in your browser, and your inputs stay on this device.</p>
           <div className="flex items-center gap-4">
             <button
               type="button"
               onClick={() => setHelpOpen(true)}
-              className="hover:text-slate-300"
+              className="hover:text-ink hover:underline"
             >
               Quick guide
             </button>
             <button
               type="button"
               onClick={() => setActiveModule('report')}
-              className="font-medium text-indigo-400 hover:text-indigo-300"
+              className="text-accent hover:text-accent-strong hover:underline"
             >
               Open project report
             </button>

@@ -2,43 +2,102 @@
 
 @theme {
   --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* Paper, ink and rules. The whole interface is built from these. */
+  --color-paper: #f2eee3;
+  --color-sheet: #fffdf7;
+  --color-well: #f8f4ea;
+  --color-wash: #e9e2d1;
+  --color-rule: #d7cfbc;
+  --color-rule-strong: #b9ae97;
+  --color-ink: #1f1d18;
+  --color-ink-soft: #4c463c;
+  --color-ink-muted: #6e6656;
+  --color-ink-faint: #a09783;
+
+  --color-accent: #1f3f66;
+  --color-accent-strong: #162f4e;
+  --color-accent-wash: #dfe7f0;
+
+  --color-good: #2f5d3a;
+  --color-good-bg: #e7efe4;
+  --color-good-line: #a9c3a2;
+  --color-bad: #7d2b2b;
+  --color-bad-bg: #f6e5e1;
+  --color-bad-line: #d3a49d;
+  --color-warn: #6b4e12;
+  --color-warn-bg: #f7edd6;
+  --color-warn-line: #d9bd86;
+  --color-plum: #6a4575;
+
+  /* Squarer corners and quiet shadows keep it closer to print than to a dashboard. */
+  --radius-md: 2px;
+  --radius-lg: 3px;
+  --radius-xl: 4px;
+  --radius-2xl: 6px;
+  --radius-3xl: 8px;
+
+  --shadow-xl: 0 1px 2px rgba(31, 29, 24, 0.08), 0 10px 26px rgba(31, 29, 24, 0.06);
+  --shadow-2xl: 0 2px 4px rgba(31, 29, 24, 0.1), 0 18px 44px rgba(31, 29, 24, 0.08);
 }
 
 @layer base {
   :root {
-    color-scheme: dark;
+    color-scheme: light;
   }
 
   html {
     scroll-behavior: smooth;
-    scroll-padding-top: 5rem;
+    scroll-padding-top: 5.5rem;
   }
 
   body {
     margin: 0;
-    font-family: 'IBM Plex Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background-color: #070b14;
-    color: #e2e8f0;
+    font-family: var(--font-sans);
+    background-color: var(--color-paper);
+    color: var(--color-ink);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-serif);
+    letter-spacing: -0.01em;
   }
 
   code,
   pre,
   .font-mono,
   input[type='number'] {
-    font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-family: var(--font-mono);
   }
 
   :focus-visible {
-    outline: 2px solid #818cf8;
+    outline: 2px solid var(--color-accent);
     outline-offset: 2px;
   }
 
   ::selection {
-    background: #4f46e5;
-    color: #ffffff;
+    background: var(--color-accent);
+    color: var(--color-sheet);
+  }
+
+  /* Data tables are set like the ones in a lab record. */
+  table {
+    border-collapse: collapse;
+  }
+
+  thead th {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-ink-muted);
   }
 
   /* Keep native number spinners out of the dense tables. */
@@ -61,9 +120,18 @@
   .scrollbar-none::-webkit-scrollbar {
     display: none;
   }
+
+  /* Small caps label used above headings and for section kickers. */
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-ink-muted);
+  }
 }
 
-/* Lightweight toast entry, replacing the old tailwindcss-animate class names. */
 @keyframes toast-in {
   from {
     opacity: 0;
@@ -95,7 +163,7 @@
 
   body {
     background: #ffffff !important;
-    color: #0f172a !important;
+    color: #1f1d18 !important;
     font-size: 11pt;
   }
 
@@ -121,7 +189,7 @@
     border: 1px solid #cbd5e1 !important;
     background: #ffffff !important;
     box-shadow: none !important;
-    color: #0f172a !important;
+    color: #1f1d18 !important;
     padding: 0 !important;
   }
 

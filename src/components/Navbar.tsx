@@ -1,6 +1,6 @@
 import React from 'react';
 import { AlgorithmModule } from '../types/os';
-import { Cpu, Layers, HardDrive, ShieldAlert, FileText, HelpCircle, RotateCcw } from 'lucide-react';
+import { HelpCircle, RotateCcw, FileText } from 'lucide-react';
 
 interface NavbarProps {
   activeModule: AlgorithmModule;
@@ -9,12 +9,12 @@ interface NavbarProps {
   onOpenHelp: () => void;
 }
 
-const NAV_ITEMS: { id: AlgorithmModule; label: string; shortLabel: string; icon: React.ReactNode }[] = [
-  { id: 'cpu', label: 'CPU scheduling', shortLabel: 'CPU', icon: <Cpu className="w-4 h-4" /> },
-  { id: 'page', label: 'Page replacement', shortLabel: 'Pages', icon: <Layers className="w-4 h-4" /> },
-  { id: 'disk', label: 'Disk scheduling', shortLabel: 'Disk', icon: <HardDrive className="w-4 h-4" /> },
-  { id: 'banker', label: 'Deadlock avoidance', shortLabel: 'Deadlock', icon: <ShieldAlert className="w-4 h-4" /> },
-  { id: 'report', label: 'Project report', shortLabel: 'Report', icon: <FileText className="w-4 h-4" /> },
+const NAV_ITEMS: { id: AlgorithmModule; label: string; shortLabel: string }[] = [
+  { id: 'cpu', label: 'CPU scheduling', shortLabel: 'CPU' },
+  { id: 'page', label: 'Page replacement', shortLabel: 'Pages' },
+  { id: 'disk', label: 'Disk scheduling', shortLabel: 'Disk' },
+  { id: 'banker', label: 'Deadlock avoidance', shortLabel: 'Deadlock' },
+  { id: 'report', label: 'Project report', shortLabel: 'Report' },
 ];
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -24,88 +24,89 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenHelp,
 }) => {
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-800/80 bg-[#070b14]/90 backdrop-blur no-print">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between gap-4">
+    <header className="sticky top-0 z-40 border-b border-rule bg-paper/95 no-print">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex h-[4.5rem] items-center justify-between gap-6">
           <button
             type="button"
             onClick={() => onSelectModule('cpu')}
-            className="flex items-center gap-3 text-left rounded-md"
+            className="flex items-center gap-3 text-left"
             aria-label="OS Lab, go to CPU scheduling"
             title="Go to CPU scheduling"
           >
-            <span aria-hidden="true" className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 font-mono text-sm font-bold text-white">
+            <span
+              aria-hidden="true"
+              className="flex h-10 w-10 items-center justify-center border border-ink font-serif text-base font-semibold leading-none"
+            >
               OS
             </span>
             <span>
-              <span className="block text-base font-semibold tracking-tight text-slate-100">OS Lab</span>
-              <span className="hidden sm:block text-xs text-slate-500">
-                CPU, memory, disk and deadlock simulators
+              <span className="block font-serif text-lg font-semibold leading-tight">OS Lab</span>
+              <span className="hidden font-mono text-[10px] uppercase tracking-[0.14em] text-ink-muted sm:block">
+                Operating systems laboratory
               </span>
             </span>
           </button>
 
-          <nav aria-label="Modules" className="hidden lg:flex items-center gap-1 rounded-lg border border-slate-800 bg-slate-900/70 p-1">
+          <nav aria-label="Modules" className="hidden self-stretch xl:flex xl:gap-6">
             {NAV_ITEMS.map((item) => {
               const isActive = activeModule === item.id;
-              const isReport = item.id === 'report';
               return (
                 <button
                   key={item.id}
                   type="button"
                   onClick={() => onSelectModule(item.id)}
                   aria-current={isActive ? 'page' : undefined}
-                  className={`flex items-center gap-2 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+                  className={`flex items-center border-b-2 text-[13px] transition-colors ${
                     isActive
-                      ? isReport
-                        ? 'bg-indigo-600 text-white'
-                        : 'bg-slate-800 text-slate-100'
-                      : isReport
-                        ? 'text-indigo-300 hover:bg-slate-800/70 hover:text-indigo-200'
-                        : 'text-slate-400 hover:bg-slate-800/70 hover:text-slate-100'
+                      ? 'border-accent font-medium text-ink'
+                      : 'border-transparent text-ink-muted hover:text-ink'
                   }`}
                 >
-                  {item.icon}
-                  <span>{item.label}</span>
+                  {item.label}
                 </button>
               );
             })}
           </nav>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={onOpenHelp}
               title="Quick guide"
               aria-label="Open the quick guide"
-              className="rounded-md border border-slate-800 p-2 text-slate-400 transition-colors hover:bg-slate-900 hover:text-slate-100"
+              className="flex items-center gap-1.5 text-xs text-ink-muted transition-colors hover:text-ink"
             >
-              <HelpCircle className="w-4 h-4" />
+              <HelpCircle className="h-4 w-4" aria-hidden="true" />
+              <span className="hidden sm:inline">Guide</span>
             </button>
 
             <button
               type="button"
               onClick={onResetDefaults}
               title="Reset every module to the starting examples"
-              className="hidden sm:flex items-center gap-1.5 rounded-md border border-slate-800 px-2.5 py-1.5 text-xs text-slate-400 transition-colors hover:bg-slate-900 hover:text-slate-200"
+              className="hidden items-center gap-1.5 text-xs text-ink-muted transition-colors hover:text-ink sm:flex"
             >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span>Reset data</span>
+              <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>Reset</span>
             </button>
 
             <button
               type="button"
               onClick={() => onSelectModule('report')}
-              className="flex items-center gap-2 rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-indigo-500"
+              className="flex items-center gap-2 border border-accent bg-accent px-3 py-2 text-xs font-medium text-sheet transition-colors hover:bg-accent-strong"
             >
-              <FileText className="w-4 h-4" />
+              <FileText className="h-4 w-4" aria-hidden="true" />
               <span className="hidden sm:inline">Project report</span>
               <span className="sm:hidden">Report</span>
             </button>
           </div>
         </div>
 
-        <nav aria-label="Modules" className="flex lg:hidden gap-1 overflow-x-auto border-t border-slate-900 py-2 scrollbar-none">
+        <nav
+          aria-label="Modules"
+          className="flex gap-5 overflow-x-auto border-t border-rule py-2.5 scrollbar-none xl:hidden"
+        >
           {NAV_ITEMS.map((item) => {
             const isActive = activeModule === item.id;
             return (
@@ -114,16 +115,13 @@ export const Navbar: React.FC<NavbarProps> = ({
                 type="button"
                 onClick={() => onSelectModule(item.id)}
                 aria-current={isActive ? 'page' : undefined}
-                className={`flex shrink-0 items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+                className={`shrink-0 border-b-2 pb-1 text-xs transition-colors ${
                   isActive
-                    ? item.id === 'report'
-                      ? 'bg-indigo-600 text-white'
-                      : 'border border-slate-700 bg-slate-800 text-slate-100'
-                    : 'text-slate-400 hover:text-slate-200'
+                    ? 'border-accent font-medium text-ink'
+                    : 'border-transparent text-ink-muted hover:text-ink'
                 }`}
               >
-                {item.icon}
-                <span>{item.shortLabel}</span>
+                {item.shortLabel}
               </button>
             );
           })}

@@ -182,14 +182,14 @@ export const BankersView: React.FC<BankersViewProps> = ({ state, onUpdateState, 
 
   return (
     <div className="space-y-6">
-      <header className="flex flex-col gap-4 border-b border-slate-800 pb-5 md:flex-row md:items-end md:justify-between">
+      <header className="flex flex-col gap-4 border-b border-rule pb-5 md:flex-row md:items-end md:justify-between">
         <div className="max-w-2xl">
-          <p className="text-xs font-medium text-indigo-400">Module 4</p>
-          <h1 className="mt-1 flex items-center gap-2 text-xl font-semibold text-slate-100">
-            <ShieldAlert className="h-5 w-5 text-indigo-400" aria-hidden="true" />
+          <p className="eyebrow">Module 4</p>
+          <h1 className="mt-1 flex items-center gap-2 text-xl font-semibold text-ink">
+            <ShieldAlert className="h-5 w-5 text-accent" aria-hidden="true" />
             Deadlock avoidance
           </h1>
-          <p className="mt-1.5 text-sm leading-relaxed text-slate-400">
+          <p className="mt-1.5 text-sm leading-relaxed text-ink-muted">
             Banker's algorithm checks whether the current allocation still leaves at least one order in
             which every process can finish. Edit the matrices and the check runs again immediately.
           </p>
@@ -199,7 +199,7 @@ export const BankersView: React.FC<BankersViewProps> = ({ state, onUpdateState, 
           <button
             type="button"
             onClick={onResetDefaults}
-            className="flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-200 transition-colors hover:bg-slate-700"
+            className="flex items-center gap-1.5 rounded-md border border-rule-strong bg-wash px-3 py-1.5 text-xs font-medium text-ink transition-colors hover:bg-rule"
           >
             <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
             Safe example
@@ -207,9 +207,9 @@ export const BankersView: React.FC<BankersViewProps> = ({ state, onUpdateState, 
           <button
             type="button"
             onClick={loadUnsafePreset}
-            className="flex items-center gap-1.5 rounded-md border border-rose-800/60 bg-rose-950/40 px-3 py-1.5 text-xs font-medium text-rose-200 transition-colors hover:bg-rose-900/50"
+            className="flex items-center gap-1.5 rounded-md border border-bad-line/60 bg-bad-bg px-3 py-1.5 text-xs font-medium text-bad transition-colors hover:bg-bad-bg"
           >
-            <AlertTriangle className="h-3.5 w-3.5 text-rose-400" aria-hidden="true" />
+            <AlertTriangle className="h-3.5 w-3.5 text-bad" aria-hidden="true" />
             Unsafe example
           </button>
         </div>
@@ -217,25 +217,25 @@ export const BankersView: React.FC<BankersViewProps> = ({ state, onUpdateState, 
 
       <section
         className={`rounded-lg border p-4 ${
-          safetyResult.isSafe ? 'border-emerald-500/40 bg-emerald-950/20' : 'border-rose-500/40 bg-rose-950/20'
+          safetyResult.isSafe ? 'border-good-line/40 bg-good-bg' : 'border-bad-line/40 bg-bad-bg'
         }`}
         aria-labelledby="safety-heading"
       >
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-start gap-3">
             {safetyResult.isSafe ? (
-              <CheckCircle2 className="mt-0.5 h-6 w-6 shrink-0 text-emerald-400" aria-hidden="true" />
+              <CheckCircle2 className="mt-0.5 h-6 w-6 shrink-0 text-good" aria-hidden="true" />
             ) : (
-              <AlertTriangle className="mt-0.5 h-6 w-6 shrink-0 text-rose-400" aria-hidden="true" />
+              <AlertTriangle className="mt-0.5 h-6 w-6 shrink-0 text-bad" aria-hidden="true" />
             )}
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <h2 id="safety-heading" className="text-sm font-semibold text-slate-100">
+                <h2 id="safety-heading" className="text-sm font-semibold text-ink">
                   {safetyResult.isSafe ? 'This state is safe' : 'This state is unsafe'}
                 </h2>
                 <span
                   className={`rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
-                    safetyResult.isSafe ? 'bg-emerald-900/60 text-emerald-300' : 'bg-rose-900/60 text-rose-300'
+                    safetyResult.isSafe ? 'bg-good-bg text-good' : 'bg-bad-bg text-bad'
                   }`}
                 >
                   {safetyResult.isSafe ? 'Safe' : 'Unsafe'}
@@ -243,14 +243,14 @@ export const BankersView: React.FC<BankersViewProps> = ({ state, onUpdateState, 
               </div>
 
               {safetyResult.isSafe ? (
-                <p className="mt-1 text-sm text-slate-300">
+                <p className="mt-1 text-sm text-ink-soft">
                   A safe completion order exists:{' '}
-                  <span className="font-mono font-semibold text-emerald-300">
+                  <span className="font-mono font-semibold text-good">
                     {safetyResult.safeSequence.join(' → ')}
                   </span>
                 </p>
               ) : (
-                <p className="mt-1 max-w-xl text-sm leading-relaxed text-slate-300">
+                <p className="mt-1 max-w-xl text-sm leading-relaxed text-ink-soft">
                   No process can finish with the resources currently available. An unsafe state is not a
                   deadlock by itself, but it can become one if processes ask for everything they declared.
                 </p>
@@ -258,12 +258,12 @@ export const BankersView: React.FC<BankersViewProps> = ({ state, onUpdateState, 
             </div>
           </div>
 
-          <div className="rounded-md border border-slate-700/80 bg-slate-900/90 px-3 py-2">
-            <span className="text-[11px] font-medium text-slate-400">Available now</span>
+          <div className="rounded-md border border-rule-strong/80 bg-sheet px-3 py-2">
+            <span className="text-[11px] font-medium text-ink-muted">Available now</span>
             <div className="mt-1 flex items-center gap-2">
               {state.resourceNames.map((resourceName, index) => (
                 <label key={resourceName} className="flex items-center gap-1 font-mono text-xs">
-                  <span className="font-semibold text-slate-400">{resourceName}</span>
+                  <span className="font-semibold text-ink-muted">{resourceName}</span>
                   <input
                     type="number"
                     min={0}
@@ -272,7 +272,7 @@ export const BankersView: React.FC<BankersViewProps> = ({ state, onUpdateState, 
                       handleUpdateAvailable(index, Number.parseInt(event.target.value, 10) || 0)
                     }
                     aria-label={`Available instances of resource ${resourceName}`}
-                    className="w-12 rounded border border-slate-700 bg-slate-950 px-1 py-0.5 text-center font-semibold text-indigo-300 focus:border-indigo-500 focus:outline-none"
+                    className="w-12 rounded border border-rule-strong bg-well px-1 py-0.5 text-center font-semibold text-accent focus:border-accent focus:outline-none"
                   />
                 </label>
               ))}
@@ -282,7 +282,7 @@ export const BankersView: React.FC<BankersViewProps> = ({ state, onUpdateState, 
       </section>
 
       {invalidCells.length > 0 && (
-        <p className="flex items-start gap-2 rounded-lg border border-amber-500/40 bg-amber-950/20 p-3 text-xs text-amber-200">
+        <p className="flex items-start gap-2 rounded-lg border border-warn-line/40 bg-warn-bg p-3 text-xs text-warn">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
           <span>
             Allocation is larger than Max for {invalidCells.slice(0, 4).join(', ')}
@@ -292,13 +292,13 @@ export const BankersView: React.FC<BankersViewProps> = ({ state, onUpdateState, 
         </p>
       )}
 
-      <div className="flex flex-wrap items-end gap-4 rounded-lg border border-slate-800 bg-slate-900/60 p-3">
-        <label className="flex items-center gap-2 text-xs text-slate-400">
+      <div className="flex flex-wrap items-end gap-4 rounded-lg border border-rule bg-sheet p-3">
+        <label className="flex items-center gap-2 text-xs text-ink-muted">
           Processes
           <select
             value={state.processCount}
             onChange={(event) => handleProcessCount(Number(event.target.value))}
-            className="rounded border border-slate-700 bg-slate-950 px-2 py-1 font-mono text-xs text-slate-200 focus:border-indigo-500 focus:outline-none"
+            className="rounded border border-rule-strong bg-well px-2 py-1 font-mono text-xs text-ink focus:border-accent focus:outline-none"
           >
             {PROCESS_OPTIONS.map((count) => (
               <option key={count} value={count}>
@@ -308,12 +308,12 @@ export const BankersView: React.FC<BankersViewProps> = ({ state, onUpdateState, 
           </select>
         </label>
 
-        <label className="flex items-center gap-2 text-xs text-slate-400">
+        <label className="flex items-center gap-2 text-xs text-ink-muted">
           Resource types
           <select
             value={state.resourceCount}
             onChange={(event) => handleResourceCount(Number(event.target.value))}
-            className="rounded border border-slate-700 bg-slate-950 px-2 py-1 font-mono text-xs text-slate-200 focus:border-indigo-500 focus:outline-none"
+            className="rounded border border-rule-strong bg-well px-2 py-1 font-mono text-xs text-ink focus:border-accent focus:outline-none"
           >
             {RESOURCE_OPTIONS.map((count) => (
               <option key={count} value={count}>
@@ -323,7 +323,7 @@ export const BankersView: React.FC<BankersViewProps> = ({ state, onUpdateState, 
           </select>
         </label>
 
-        <p className="text-[11px] text-slate-500">
+        <p className="text-[11px] text-ink-muted">
           Need = Max − Allocation. It is shown read-only.
         </p>
       </div>
@@ -349,7 +349,7 @@ export const BankersView: React.FC<BankersViewProps> = ({ state, onUpdateState, 
                   )
                 }
                 aria-label={`Allocation for P${processIndex}, resource ${state.resourceNames[resourceIndex]}`}
-                className="w-10 rounded border border-slate-800 bg-slate-950 px-1 py-0.5 text-center text-slate-200 focus:border-indigo-500 focus:outline-none"
+                className="w-10 rounded border border-rule bg-well px-1 py-0.5 text-center text-ink focus:border-accent focus:outline-none"
               />
             ))
           )}
@@ -370,7 +370,7 @@ export const BankersView: React.FC<BankersViewProps> = ({ state, onUpdateState, 
                   updateCell('max', processIndex, resourceIndex, Number.parseInt(event.target.value, 10) || 0)
                 }
                 aria-label={`Maximum claim for P${processIndex}, resource ${state.resourceNames[resourceIndex]}`}
-                className="w-10 rounded border border-slate-800 bg-slate-950 px-1 py-0.5 text-center text-slate-200 focus:border-indigo-500 focus:outline-none"
+                className="w-10 rounded border border-rule bg-well px-1 py-0.5 text-center text-ink focus:border-accent focus:outline-none"
               />
             ))
           )}
@@ -383,7 +383,7 @@ export const BankersView: React.FC<BankersViewProps> = ({ state, onUpdateState, 
           tone="indigo"
           rows={Array.from({ length: state.processCount }, (_, processIndex) =>
             state.resourceNames.map((_, resourceIndex) => (
-              <span key={resourceIndex} className="inline-block w-10 py-0.5 font-semibold text-indigo-300">
+              <span key={resourceIndex} className="inline-block w-10 py-0.5 font-semibold text-accent">
                 {needMatrix[processIndex]?.[resourceIndex] ?? 0}
               </span>
             ))
@@ -391,12 +391,12 @@ export const BankersView: React.FC<BankersViewProps> = ({ state, onUpdateState, 
         />
       </div>
 
-      <section className="rounded-lg border border-slate-800 bg-slate-900 p-4" aria-labelledby="safety-steps-heading">
+      <section className="rounded-lg border border-rule bg-sheet p-4" aria-labelledby="safety-steps-heading">
         <div className="mb-3">
-          <h2 id="safety-steps-heading" className="text-sm font-semibold text-slate-200">
+          <h2 id="safety-steps-heading" className="text-sm font-semibold text-ink">
             Safety check
           </h2>
-          <p className="mt-0.5 text-xs text-slate-500">
+          <p className="mt-0.5 text-xs text-ink-muted">
             Each step finds a process whose need fits in the current available resources, lets it finish,
             and adds its allocation back to the pool.
           </p>
@@ -405,29 +405,29 @@ export const BankersView: React.FC<BankersViewProps> = ({ state, onUpdateState, 
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-left text-xs font-mono">
             <thead>
-              <tr className="border-b border-slate-800 text-slate-400">
+              <tr className="border-b border-rule text-ink-muted">
                 <th scope="col" className="px-3 py-2 font-medium">Step</th>
                 <th scope="col" className="px-3 py-2 font-medium">Process</th>
                 <th scope="col" className="px-3 py-2 font-medium">Work before</th>
                 <th scope="col" className="px-3 py-2 font-medium">Need</th>
                 <th scope="col" className="px-3 py-2 font-medium">Allocation</th>
-                <th scope="col" className="px-3 py-2 font-medium text-emerald-400">Work after</th>
+                <th scope="col" className="px-3 py-2 font-medium text-good">Work after</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800">
+            <tbody className="divide-y divide-rule">
               {safetyResult.steps.map((step) => (
-                <tr key={step.step} className="transition-colors hover:bg-slate-800/40">
-                  <td className="px-3 py-2 text-slate-500">{step.step}</td>
-                  <td className="px-3 py-2 font-semibold text-indigo-300">{step.processId}</td>
-                  <td className="px-3 py-2 text-slate-300">[{step.workBefore.join(', ')}]</td>
-                  <td className="px-3 py-2 text-amber-300">[{step.need.join(', ')}]</td>
-                  <td className="px-3 py-2 text-slate-400">[{step.allocation.join(', ')}]</td>
-                  <td className="px-3 py-2 font-semibold text-emerald-400">[{step.workAfter.join(', ')}]</td>
+                <tr key={step.step} className="transition-colors hover:bg-wash">
+                  <td className="px-3 py-2 text-ink-muted">{step.step}</td>
+                  <td className="px-3 py-2 font-semibold text-accent">{step.processId}</td>
+                  <td className="px-3 py-2 text-ink-soft">[{step.workBefore.join(', ')}]</td>
+                  <td className="px-3 py-2 text-warn">[{step.need.join(', ')}]</td>
+                  <td className="px-3 py-2 text-ink-muted">[{step.allocation.join(', ')}]</td>
+                  <td className="px-3 py-2 font-semibold text-good">[{step.workAfter.join(', ')}]</td>
                 </tr>
               ))}
               {safetyResult.steps.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-3 py-4 text-center text-rose-300">
+                  <td colSpan={6} className="px-3 py-4 text-center text-bad">
                     No process has a need that fits in the available resources, so the check cannot start.
                   </td>
                 </tr>
@@ -437,7 +437,7 @@ export const BankersView: React.FC<BankersViewProps> = ({ state, onUpdateState, 
         </div>
 
         {!safetyResult.isSafe && (
-          <p className="mt-3 flex items-start gap-2 rounded border border-rose-500/30 bg-rose-950/20 p-3 text-xs leading-relaxed text-rose-200">
+          <p className="mt-3 flex items-start gap-2 rounded border border-bad-line/30 bg-bad-bg p-3 text-xs leading-relaxed text-bad">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
             <span>
               Still waiting: <strong className="font-semibold">{blockedProcesses.join(', ') || 'none'}</strong>. None of
@@ -447,20 +447,20 @@ export const BankersView: React.FC<BankersViewProps> = ({ state, onUpdateState, 
         )}
       </section>
 
-      <section className="space-y-4 rounded-lg border border-indigo-500/30 bg-slate-900 p-5" aria-labelledby="request-heading">
+      <section className="space-y-4 rounded-lg border border-accent/30 bg-sheet p-5" aria-labelledby="request-heading">
         <div className="flex items-center gap-2">
-          <Play className="h-4 w-4 text-indigo-400" aria-hidden="true" />
-          <h2 id="request-heading" className="text-sm font-semibold text-slate-100">
+          <Play className="h-4 w-4 text-accent" aria-hidden="true" />
+          <h2 id="request-heading" className="text-sm font-semibold text-ink">
             Test a resource request
           </h2>
         </div>
-        <p className="text-xs leading-relaxed text-slate-400">
+        <p className="text-xs leading-relaxed text-ink-muted">
           Pick a process and enter what it asks for. The request is tested against its remaining need and the
           available resources before the safety check is repeated on the temporary state.
         </p>
 
-        <div className="flex flex-col gap-4 rounded-lg border border-slate-800 bg-slate-950 p-3 lg:flex-row lg:items-center">
-          <label className="flex items-center gap-2 text-xs text-slate-400">
+        <div className="flex flex-col gap-4 rounded-lg border border-rule bg-well p-3 lg:flex-row lg:items-center">
+          <label className="flex items-center gap-2 text-xs text-ink-muted">
             Process
             <select
               value={requestProc}
@@ -469,7 +469,7 @@ export const BankersView: React.FC<BankersViewProps> = ({ state, onUpdateState, 
                 setRequestResult(null);
                 setRequestApplied(false);
               }}
-              className="rounded border border-slate-700 bg-slate-900 px-2.5 py-1 font-mono text-xs text-slate-200 focus:border-indigo-500 focus:outline-none"
+              className="rounded border border-rule-strong bg-sheet px-2.5 py-1 font-mono text-xs text-ink focus:border-accent focus:outline-none"
             >
               {Array.from({ length: state.processCount }, (_, index) => (
                 <option key={index} value={index}>
@@ -480,10 +480,10 @@ export const BankersView: React.FC<BankersViewProps> = ({ state, onUpdateState, 
           </label>
 
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs text-slate-400">Request</span>
+            <span className="text-xs text-ink-muted">Request</span>
             {state.resourceNames.map((resourceName, index) => (
               <label key={resourceName} className="flex items-center gap-1 font-mono text-xs">
-                <span className="text-slate-400">{resourceName}</span>
+                <span className="text-ink-muted">{resourceName}</span>
                 <input
                   type="number"
                   min={0}
@@ -497,7 +497,7 @@ export const BankersView: React.FC<BankersViewProps> = ({ state, onUpdateState, 
                     setRequestApplied(false);
                   }}
                   aria-label={`Requested instances of resource ${resourceName}`}
-                  className="w-12 rounded border border-slate-700 bg-slate-900 px-1.5 py-0.5 text-center text-slate-100 focus:border-indigo-500 focus:outline-none"
+                  className="w-12 rounded border border-rule-strong bg-sheet px-1.5 py-0.5 text-center text-ink focus:border-accent focus:outline-none"
                 />
               </label>
             ))}
@@ -506,7 +506,7 @@ export const BankersView: React.FC<BankersViewProps> = ({ state, onUpdateState, 
           <button
             type="button"
             onClick={handleEvaluateRequest}
-            className="flex items-center justify-center gap-1.5 rounded bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-indigo-500 lg:ml-auto"
+            className="flex items-center justify-center gap-1.5 rounded bg-accent px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-accent-strong lg:ml-auto"
           >
             <Send className="h-3.5 w-3.5" aria-hidden="true" />
             Evaluate
@@ -518,8 +518,8 @@ export const BankersView: React.FC<BankersViewProps> = ({ state, onUpdateState, 
             role="status"
             className={`rounded-lg border p-3.5 text-xs leading-relaxed ${
               requestResult.allowed
-                ? 'border-emerald-500/50 bg-emerald-950/30 text-emerald-200'
-                : 'border-rose-500/50 bg-rose-950/30 text-rose-200'
+                ? 'border-good-line/50 bg-good-bg text-good'
+                : 'border-bad-line/50 bg-bad-bg text-bad'
             }`}
           >
             <div className="flex items-start gap-2">
@@ -535,7 +535,7 @@ export const BankersView: React.FC<BankersViewProps> = ({ state, onUpdateState, 
                   <button
                     type="button"
                     onClick={handleApplyRequest}
-                    className="mt-2 flex items-center gap-1 rounded border border-emerald-500/40 bg-emerald-900/30 px-2 py-1 text-[11px] font-semibold text-emerald-200 hover:bg-emerald-900/50"
+                    className="mt-2 flex items-center gap-1 rounded border border-good-line/40 bg-good-bg px-2 py-1 text-[11px] font-semibold text-good hover:bg-good-bg"
                   >
                     <Check className="h-3 w-3" aria-hidden="true" />
                     Apply this request
@@ -547,14 +547,14 @@ export const BankersView: React.FC<BankersViewProps> = ({ state, onUpdateState, 
         )}
       </section>
 
-      <section className="overflow-hidden rounded-lg border border-slate-800 bg-slate-900/60">
+      <section className="overflow-hidden rounded-lg border border-rule bg-sheet">
         <details className="group">
-          <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-xs font-medium text-slate-400 hover:text-slate-200">
+          <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-xs font-medium text-ink-muted hover:text-ink">
             <span>Detailed safety log ({safetyResult.executionLogs.length} entries)</span>
-            <span className="text-indigo-400 group-open:hidden">Show</span>
-            <span className="hidden text-indigo-400 group-open:inline">Hide</span>
+            <span className="text-accent group-open:hidden">Show</span>
+            <span className="hidden text-accent group-open:inline">Hide</span>
           </summary>
-          <div className="max-h-56 space-y-1 overflow-y-auto border-t border-slate-800 bg-slate-950 p-4 font-mono text-xs leading-relaxed text-slate-300">
+          <div className="max-h-56 space-y-1 overflow-y-auto border-t border-rule bg-well p-4 font-mono text-xs leading-relaxed text-ink-soft">
             {safetyResult.executionLogs.map((log, index) => (
               <p key={index}>{log}</p>
             ))}
@@ -574,17 +574,17 @@ interface MatrixCardProps {
 }
 
 const MatrixCard: React.FC<MatrixCardProps> = ({ title, description, resourceNames, rows, tone = 'default' }) => (
-  <section className="rounded-lg border border-slate-800 bg-slate-900 p-4" aria-label={title}>
+  <section className="rounded-lg border border-rule bg-sheet p-4" aria-label={title}>
     <div className="mb-2 flex items-start justify-between gap-2">
       <div>
-        <h2 className={`text-sm font-semibold ${tone === 'indigo' ? 'text-indigo-300' : 'text-slate-200'}`}>{title}</h2>
-        <p className="mt-0.5 text-[11px] text-slate-500">{description}</p>
+        <h2 className={`text-sm font-semibold ${tone === 'indigo' ? 'text-accent' : 'text-ink'}`}>{title}</h2>
+        <p className="mt-0.5 text-[11px] text-ink-muted">{description}</p>
       </div>
     </div>
 
     <table className="w-full border-collapse text-center text-xs font-mono">
       <thead>
-        <tr className="border-b border-slate-800 text-slate-400">
+        <tr className="border-b border-rule text-ink-muted">
           <th scope="col" className="px-2 py-1.5 text-left font-medium">Proc</th>
           {resourceNames.map((name) => (
             <th key={name} scope="col" className="px-2 py-1.5 font-medium">
@@ -593,10 +593,10 @@ const MatrixCard: React.FC<MatrixCardProps> = ({ title, description, resourceNam
           ))}
         </tr>
       </thead>
-      <tbody className="divide-y divide-slate-800">
+      <tbody className="divide-y divide-rule">
         {rows.map((row, rowIndex) => (
           <tr key={rowIndex}>
-            <th scope="row" className="px-2 py-1.5 text-left font-semibold text-slate-300">
+            <th scope="row" className="px-2 py-1.5 text-left font-semibold text-ink-soft">
               P{rowIndex}
             </th>
             {resourceNames.map((name, columnIndex) => (

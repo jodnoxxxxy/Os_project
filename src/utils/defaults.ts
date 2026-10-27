@@ -1,11 +1,11 @@
 import { BankersState, Process, StudentReportInfo } from '../types/os';
 
 export const DEFAULT_PROCESSES: Process[] = [
-  { id: 'P1', arrivalTime: 0, burstTime: 5, priority: 3, color: '#3b82f6' },
-  { id: 'P2', arrivalTime: 1, burstTime: 3, priority: 1, color: '#10b981' },
-  { id: 'P3', arrivalTime: 2, burstTime: 8, priority: 4, color: '#f59e0b' },
-  { id: 'P4', arrivalTime: 3, burstTime: 6, priority: 2, color: '#8b5cf6' },
-  { id: 'P5', arrivalTime: 4, burstTime: 4, priority: 5, color: '#ec4899' },
+  { id: 'P1', arrivalTime: 0, burstTime: 5, priority: 3, color: '#33608c' },
+  { id: 'P2', arrivalTime: 1, burstTime: 3, priority: 1, color: '#3c6b50' },
+  { id: 'P3', arrivalTime: 2, burstTime: 8, priority: 4, color: '#a8762a' },
+  { id: 'P4', arrivalTime: 3, burstTime: 6, priority: 2, color: '#6a4575' },
+  { id: 'P5', arrivalTime: 4, burstTime: 4, priority: 5, color: '#9b4a3d' },
 ];
 
 export const DEFAULT_PAGE_REFERENCE_STRING: number[] = [7, 0, 1, 2, 0, 3, 0, 4, 2, 3, 0, 3, 2, 1, 2, 0, 1, 7, 0, 1];

@@ -54,7 +54,7 @@ export const HelpPanel: React.FC<HelpPanelProps> = ({ open, onClose }) => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-6 no-print"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-ink/40 p-0 sm:items-center sm:p-6 no-print"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
@@ -63,14 +63,14 @@ export const HelpPanel: React.FC<HelpPanelProps> = ({ open, onClose }) => {
         role="dialog"
         aria-modal="true"
         aria-labelledby="quick-guide-title"
-        className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-t-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl sm:rounded-2xl sm:p-6"
+        className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-t-2xl border border-rule bg-sheet p-5 shadow-2xl sm:rounded-2xl sm:p-6"
       >
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 id="quick-guide-title" className="text-lg font-semibold text-slate-100">
+            <h2 id="quick-guide-title" className="text-lg font-semibold text-ink">
               Quick guide
             </h2>
-            <p className="mt-1 text-sm text-slate-400">
+            <p className="mt-1 text-sm text-ink-muted">
               Pick a module, change the numbers, and watch the results update. Nothing is sent to a server.
             </p>
           </div>
@@ -79,7 +79,7 @@ export const HelpPanel: React.FC<HelpPanelProps> = ({ open, onClose }) => {
             type="button"
             onClick={onClose}
             aria-label="Close quick guide"
-            className="rounded-md p-1.5 text-slate-400 hover:bg-slate-800 hover:text-slate-100"
+            className="rounded-md p-1.5 text-ink-muted hover:bg-wash hover:text-ink"
           >
             <X className="w-5 h-5" />
           </button>
@@ -88,14 +88,14 @@ export const HelpPanel: React.FC<HelpPanelProps> = ({ open, onClose }) => {
         <div className="mt-5 space-y-4">
           {GUIDE.map((item) => (
             <section key={item.title}>
-              <h3 className="text-sm font-semibold text-indigo-300">{item.title}</h3>
-              <p className="mt-1 text-sm leading-relaxed text-slate-400">{item.body}</p>
+              <h3 className="text-sm font-semibold text-accent">{item.title}</h3>
+              <p className="mt-1 text-sm leading-relaxed text-ink-muted">{item.body}</p>
             </section>
           ))}
         </div>
 
-        <p className="mt-5 rounded-lg border border-slate-800 bg-slate-950/60 p-3 text-xs leading-relaxed text-slate-400">
-          Inputs are saved in this browser, so a refresh keeps your setup. <strong className="font-semibold text-slate-300">Reset data</strong> in
+        <p className="mt-5 rounded-lg border border-rule bg-well p-3 text-xs leading-relaxed text-ink-muted">
+          Inputs are saved in this browser, so a refresh keeps your setup. <strong className="font-semibold text-ink-soft">Reset data</strong> in
           the header puts the examples back, and the message that appears lets you undo it.
         </p>
       </div>

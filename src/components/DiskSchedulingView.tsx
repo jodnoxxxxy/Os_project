@@ -134,20 +134,20 @@ export const DiskSchedulingView: React.FC<DiskSchedulingViewProps> = ({
 
   return (
     <div className="space-y-6">
-      <header className="flex flex-col gap-4 border-b border-slate-800 pb-5 md:flex-row md:items-end md:justify-between">
+      <header className="pb-0">
         <div className="max-w-2xl">
-          <p className="text-xs font-medium text-indigo-400">Module 3</p>
-          <h1 className="mt-1 flex items-center gap-2 text-xl font-semibold text-slate-100">
-            <HardDrive className="h-5 w-5 text-indigo-400" aria-hidden="true" />
+          <p className="eyebrow">Module 3</p>
+          <h1 className="mt-1 flex items-center gap-2 text-xl font-semibold text-ink">
+            <HardDrive className="h-5 w-5 text-accent" aria-hidden="true" />
             Disk scheduling
           </h1>
-          <p className="mt-1.5 text-sm leading-relaxed text-slate-400">
+          <p className="mt-1.5 text-sm leading-relaxed text-ink-muted">
             The disk arm moves between the cylinders that have pending requests. Seek length is the
             distance it travels, so a shorter total path means less mechanical work.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-1 rounded-lg border border-slate-800 bg-slate-900 p-1">
+        <div className="-mb-px mt-5 flex items-center gap-x-6 overflow-x-auto border-b border-rule scrollbar-none">
           {ALGORITHMS.map((algo) => (
             <button
               key={algo.id}
@@ -155,10 +155,10 @@ export const DiskSchedulingView: React.FC<DiskSchedulingViewProps> = ({
               onClick={() => setSelectedAlgo(algo.id)}
               title={algo.hint}
               aria-pressed={selectedAlgo === algo.id}
-              className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+              className={`-mb-px shrink-0 border-b-2 pb-2 text-xs transition-colors ${
                 selectedAlgo === algo.id
-                  ? 'bg-indigo-600 text-white'
-                  : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
+                  ? 'border-accent font-medium text-ink'
+                  : 'border-transparent text-ink-muted hover:text-ink'
               }`}
             >
               {algo.label}
@@ -167,13 +167,13 @@ export const DiskSchedulingView: React.FC<DiskSchedulingViewProps> = ({
         </div>
       </header>
 
-      <section className="space-y-4 rounded-lg border border-slate-800 bg-slate-900 p-4" aria-labelledby="disk-input-heading">
+      <section className="space-y-4 rounded-lg border border-rule bg-sheet p-4" aria-labelledby="disk-input-heading">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 id="disk-input-heading" className="text-sm font-semibold text-slate-200">
+          <h2 id="disk-input-heading" className="text-sm font-semibold text-ink">
             Inputs
           </h2>
-          <p className="text-xs text-slate-500">
-            <span className="font-medium text-slate-300">{getDiskAlgorithmName(selectedAlgo)}</span>
+          <p className="text-xs text-ink-muted">
+            <span className="font-medium text-ink-soft">{getDiskAlgorithmName(selectedAlgo)}</span>
             <span className="mx-1.5">·</span>
             {activeHint}
           </p>
@@ -181,7 +181,7 @@ export const DiskSchedulingView: React.FC<DiskSchedulingViewProps> = ({
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
           <div className="md:col-span-6">
-            <label htmlFor="disk-queue" className="mb-1 block text-xs font-medium text-slate-300">
+            <label htmlFor="disk-queue" className="mb-1 block text-xs font-medium text-ink-soft">
               Request queue
             </label>
             <input
@@ -197,21 +197,21 @@ export const DiskSchedulingView: React.FC<DiskSchedulingViewProps> = ({
               onChange={(event) => handleQueueChange(event.target.value)}
               aria-describedby="disk-queue-help"
               aria-invalid={inputMessage ? true : undefined}
-              className={`w-full rounded border bg-slate-950 px-3 py-1.5 font-mono text-xs text-indigo-200 focus:outline-none ${
-                inputMessage ? 'border-rose-500/60 focus:border-rose-400' : 'border-slate-700 focus:border-indigo-500'
+              className={`w-full rounded border bg-well px-3 py-1.5 font-mono text-xs text-accent focus:outline-none ${
+                inputMessage ? 'border-bad-line/60 focus:border-bad-line' : 'border-rule-strong focus:border-accent'
               }`}
               placeholder="98, 183, 37, 122, 14, 124, 65, 67"
             />
             <p
               id="disk-queue-help"
-              className={`mt-1 text-[11px] ${inputMessage ? 'text-rose-300' : 'text-slate-500'}`}
+              className={`mt-1 text-[11px] ${inputMessage ? 'text-bad' : 'text-ink-muted'}`}
             >
               {inputMessage ?? `${requestQueue.length} requests loaded. Use cylinders from 0 to ${maxCylinder}.`}
             </p>
           </div>
 
           <div className="md:col-span-2">
-            <label htmlFor="disk-head" className="mb-1 block text-xs font-medium text-slate-300">
+            <label htmlFor="disk-head" className="mb-1 block text-xs font-medium text-ink-soft">
               Starting cylinder
             </label>
             <input
@@ -223,12 +223,12 @@ export const DiskSchedulingView: React.FC<DiskSchedulingViewProps> = ({
               onChange={(event) =>
                 onUpdateInitialHead(Math.min(maxCylinder, Math.max(0, Number.parseInt(event.target.value, 10) || 0)))
               }
-              className="w-full rounded border border-slate-700 bg-slate-950 px-2.5 py-1.5 text-center font-mono text-xs text-slate-200 focus:border-indigo-500 focus:outline-none"
+              className="w-full rounded border border-rule-strong bg-well px-2.5 py-1.5 text-center font-mono text-xs text-ink focus:border-accent focus:outline-none"
             />
           </div>
 
           <div className="md:col-span-2">
-            <label htmlFor="disk-max" className="mb-1 block text-xs font-medium text-slate-300">
+            <label htmlFor="disk-max" className="mb-1 block text-xs font-medium text-ink-soft">
               Last cylinder
             </label>
             <input
@@ -240,14 +240,14 @@ export const DiskSchedulingView: React.FC<DiskSchedulingViewProps> = ({
               onChange={(event) =>
                 onUpdateMaxCylinder(Math.min(999, Math.max(50, Number.parseInt(event.target.value, 10) || DEFAULT_MAX_CYLINDER)))
               }
-              className="w-full rounded border border-slate-700 bg-slate-950 px-2.5 py-1.5 text-center font-mono text-xs text-slate-200 focus:border-indigo-500 focus:outline-none"
+              className="w-full rounded border border-rule-strong bg-well px-2.5 py-1.5 text-center font-mono text-xs text-ink focus:border-accent focus:outline-none"
             />
           </div>
 
           <div className="md:col-span-2">
-            <span className="mb-1 block text-xs font-medium text-slate-300">Direction</span>
+            <span className="mb-1 block text-xs font-medium text-ink-soft">Direction</span>
             <div
-              className={`flex rounded border border-slate-700 bg-slate-950 p-0.5 ${
+              className={`flex rounded border border-rule-strong bg-well p-0.5 ${
                 directionRelevant ? '' : 'opacity-40'
               }`}
               role="group"
@@ -259,7 +259,7 @@ export const DiskSchedulingView: React.FC<DiskSchedulingViewProps> = ({
                 disabled={!directionRelevant}
                 aria-pressed={direction === 'left'}
                 className={`flex flex-1 items-center justify-center gap-1 rounded py-1 text-xs font-medium ${
-                  direction === 'left' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-slate-200'
+                  direction === 'left' ? 'bg-accent text-white' : 'text-ink-muted hover:text-ink'
                 } disabled:cursor-not-allowed`}
                 title={directionRelevant ? 'Toward cylinder 0' : 'Only relevant for SCAN, C-SCAN, LOOK and C-LOOK'}
               >
@@ -272,7 +272,7 @@ export const DiskSchedulingView: React.FC<DiskSchedulingViewProps> = ({
                 disabled={!directionRelevant}
                 aria-pressed={direction === 'right'}
                 className={`flex flex-1 items-center justify-center gap-1 rounded py-1 text-xs font-medium ${
-                  direction === 'right' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-slate-200'
+                  direction === 'right' ? 'bg-accent text-white' : 'text-ink-muted hover:text-ink'
                 } disabled:cursor-not-allowed`}
                 title={directionRelevant ? `Toward cylinder ${maxCylinder}` : 'Only relevant for SCAN, C-SCAN, LOOK and C-LOOK'}
               >
@@ -283,14 +283,14 @@ export const DiskSchedulingView: React.FC<DiskSchedulingViewProps> = ({
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-800 pt-3 text-xs">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-rule pt-3 text-xs">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-slate-500">Examples:</span>
+            <span className="text-ink-muted">Examples:</span>
             <button
               type="button"
               onClick={() => loadPreset(DEFAULT_DISK_REQUESTS, DEFAULT_INITIAL_HEAD)}
               title="The classic 8-request queue starting at cylinder 53"
-              className="rounded border border-slate-700 bg-slate-800 px-2.5 py-1 text-slate-300 transition-colors hover:bg-slate-700"
+              className="rounded border border-rule-strong bg-wash px-2.5 py-1 text-ink-soft transition-colors hover:bg-rule"
             >
               Textbook queue (head 53)
             </button>
@@ -298,7 +298,7 @@ export const DiskSchedulingView: React.FC<DiskSchedulingViewProps> = ({
               type="button"
               onClick={() => loadPreset([82, 170, 43, 140, 24, 16, 190], 50)}
               title="Widely spread requests, where policy makes a large difference"
-              className="rounded border border-slate-700 bg-slate-800 px-2.5 py-1 text-slate-300 transition-colors hover:bg-slate-700"
+              className="rounded border border-rule-strong bg-wash px-2.5 py-1 text-ink-soft transition-colors hover:bg-rule"
             >
               Spread-out requests (head 50)
             </button>
@@ -308,9 +308,9 @@ export const DiskSchedulingView: React.FC<DiskSchedulingViewProps> = ({
                 const randomQueue = Array.from({ length: 8 }, () => Math.floor(Math.random() * (maxCylinder + 1)));
                 loadPreset(randomQueue, Math.floor(Math.random() * (maxCylinder + 1)));
               }}
-              className="flex items-center gap-1 rounded border border-slate-700 bg-slate-800 px-2.5 py-1 text-slate-300 transition-colors hover:bg-slate-700"
+              className="flex items-center gap-1 rounded border border-rule-strong bg-wash px-2.5 py-1 text-ink-soft transition-colors hover:bg-rule"
             >
-              <Shuffle className="h-3 w-3 text-amber-400" aria-hidden="true" />
+              <Shuffle className="h-3 w-3 text-warn" aria-hidden="true" />
               Random 8
             </button>
           </div>
@@ -322,8 +322,8 @@ export const DiskSchedulingView: React.FC<DiskSchedulingViewProps> = ({
               aria-pressed={showComparison}
               className={`flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium transition-colors ${
                 showComparison
-                  ? 'border-amber-500/50 bg-amber-500/15 text-amber-200'
-                  : 'border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700'
+                  ? 'border-warn-line/50 bg-warn text-warn'
+                  : 'border-rule-strong bg-wash text-ink hover:bg-rule'
               }`}
             >
               <BarChart3 className="h-3.5 w-3.5" aria-hidden="true" />
@@ -332,64 +332,64 @@ export const DiskSchedulingView: React.FC<DiskSchedulingViewProps> = ({
             <button
               type="button"
               onClick={onResetDefaults}
-              className="flex items-center gap-1 rounded-md border border-slate-700 bg-slate-800 px-2.5 py-1.5 text-xs font-medium text-slate-200 transition-colors hover:bg-slate-700"
+              className="flex items-center gap-1 rounded-md border border-rule-strong bg-wash px-2.5 py-1.5 text-xs font-medium text-ink transition-colors hover:bg-rule"
             >
-              <RotateCcw className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
+              <RotateCcw className="h-3.5 w-3.5 text-ink-muted" aria-hidden="true" />
               Reset
             </button>
           </div>
         </div>
 
         {!directionRelevant && (
-          <p className="flex items-start gap-1.5 text-[11px] text-slate-500">
+          <p className="flex items-start gap-1.5 text-[11px] text-ink-muted">
             <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
             Direction only matters for SCAN, C-SCAN, LOOK and C-LOOK. FCFS and SSTF ignore it.
           </p>
         )}
       </section>
 
-      <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <div className="rounded-lg border border-slate-800 bg-slate-900 p-3">
-          <dt className="text-[11px] font-medium text-slate-400">Total head movement</dt>
-          <dd className="mt-1 font-mono text-2xl font-semibold text-indigo-400">
-            {result.totalHeadMovement}<span className="ml-1 text-xs font-normal text-slate-500">cyl</span>
+      <dl className="grid grid-cols-2 border-y border-rule sm:grid-cols-4">
+        <div className="px-4 py-3.5">
+          <dt className="text-[11px] font-medium text-ink-muted">Total head movement</dt>
+          <dd className="mt-1 font-mono text-2xl font-semibold text-ink">
+            {result.totalHeadMovement}<span className="ml-1 text-xs font-normal text-ink-muted">cyl</span>
           </dd>
-          <dd className="mt-0.5 text-[10px] text-slate-500">distance travelled by the arm</dd>
+          <dd className="mt-0.5 text-[10px] text-ink-muted">distance travelled by the arm</dd>
         </div>
-        <div className="rounded-lg border border-slate-800 bg-slate-900 p-3">
-          <dt className="text-[11px] font-medium text-slate-400">Average seek</dt>
-          <dd className="mt-1 font-mono text-2xl font-semibold text-emerald-400">
-            {result.avgSeekLength}<span className="ml-1 text-xs font-normal text-slate-500">cyl</span>
+        <div className="border-l border-rule px-4 py-3.5">
+          <dt className="text-[11px] font-medium text-ink-muted">Average seek</dt>
+          <dd className="mt-1 font-mono text-2xl font-semibold text-ink">
+            {result.avgSeekLength}<span className="ml-1 text-xs font-normal text-ink-muted">cyl</span>
           </dd>
-          <dd className="mt-0.5 text-[10px] text-slate-500">movement / request</dd>
+          <dd className="mt-0.5 text-[10px] text-ink-muted">movement / request</dd>
         </div>
-        <div className="rounded-lg border border-slate-800 bg-slate-900 p-3">
-          <dt className="text-[11px] font-medium text-slate-400">Requests</dt>
-          <dd className="mt-1 font-mono text-2xl font-semibold text-amber-400">{requestQueue.length}</dd>
-          <dd className="mt-0.5 text-[10px] text-slate-500">in the queue</dd>
+        <div className="border-t border-rule px-4 py-3.5 sm:border-l sm:border-t-0">
+          <dt className="text-[11px] font-medium text-ink-muted">Requests</dt>
+          <dd className="mt-1 font-mono text-2xl font-semibold text-ink">{requestQueue.length}</dd>
+          <dd className="mt-0.5 text-[10px] text-ink-muted">in the queue</dd>
         </div>
-        <div className="rounded-lg border border-slate-800 bg-slate-900 p-3">
-          <dt className="text-[11px] font-medium text-slate-400">Start position</dt>
-          <dd className="mt-1 font-mono text-2xl font-semibold text-purple-400">{initialHead}</dd>
-          <dd className="mt-0.5 text-[10px] text-slate-500">cylinder 0 to {maxCylinder}</dd>
+        <div className="border-l border-t border-rule px-4 py-3.5 sm:border-t-0">
+          <dt className="text-[11px] font-medium text-ink-muted">Start position</dt>
+          <dd className="mt-1 font-mono text-2xl font-semibold text-ink">{initialHead}</dd>
+          <dd className="mt-0.5 text-[10px] text-ink-muted">cylinder 0 to {maxCylinder}</dd>
         </div>
       </dl>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-        <section className="rounded-lg border border-slate-800 bg-slate-900 p-4 lg:col-span-7" aria-labelledby="disk-graph-heading">
+        <section className="rounded-lg border border-rule bg-sheet p-4 lg:col-span-7" aria-labelledby="disk-graph-heading">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <div>
-              <h2 id="disk-graph-heading" className="text-sm font-semibold text-slate-200">
+              <h2 id="disk-graph-heading" className="text-sm font-semibold text-ink">
                 Arm path
               </h2>
-              <p className="mt-0.5 text-xs text-slate-500">{result.algorithmName}</p>
+              <p className="mt-0.5 text-xs text-ink-muted">{result.algorithmName}</p>
             </div>
-            <p className="max-w-full break-all text-right font-mono text-[11px] text-slate-500">
+            <p className="max-w-full break-all text-right font-mono text-[11px] text-ink-muted">
               {result.seekSequence.join(' → ')}
             </p>
           </div>
 
-          <div className="rounded-lg border border-slate-800 bg-slate-950 p-4">
+          <div className="rounded-lg border border-rule bg-well p-4">
             <div className="relative h-64 w-full">
               <svg
                 className="h-full w-full"
@@ -401,13 +401,13 @@ export const DiskSchedulingView: React.FC<DiskSchedulingViewProps> = ({
                 {result.seekSequence.map((_, index) => {
                   const y = 20 + (index / Math.max(1, result.seekSequence.length - 1)) * 200;
                   return (
-                    <line key={index} x1="40" y1={y} x2="480" y2={y} stroke="#1e293b" strokeWidth="1" strokeDasharray="2,2" />
+                    <line key={index} x1="40" y1={y} x2="480" y2={y} stroke="#d7cfbc" strokeWidth="1" strokeDasharray="2,2" />
                   );
                 })}
 
-                <line x1="40" y1="10" x2="40" y2="225" stroke="#334155" strokeWidth="1" />
-                <line x1="260" y1="10" x2="260" y2="225" stroke="#1e293b" strokeWidth="1" />
-                <line x1="480" y1="10" x2="480" y2="225" stroke="#334155" strokeWidth="1" />
+                <line x1="40" y1="10" x2="40" y2="225" stroke="#b9ae97" strokeWidth="1" />
+                <line x1="260" y1="10" x2="260" y2="225" stroke="#d7cfbc" strokeWidth="1" />
+                <line x1="480" y1="10" x2="480" y2="225" stroke="#b9ae97" strokeWidth="1" />
 
                 {(() => {
                   const points = result.seekSequence.map((value, index) => {
@@ -420,7 +420,7 @@ export const DiskSchedulingView: React.FC<DiskSchedulingViewProps> = ({
                     <>
                       <polyline
                         fill="none"
-                        stroke="#6366f1"
+                        stroke="#1f3f66"
                         strokeWidth="2.5"
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -436,13 +436,13 @@ export const DiskSchedulingView: React.FC<DiskSchedulingViewProps> = ({
                               cx={x}
                               cy={y}
                               r={isStart ? 5 : 4}
-                              fill={isStart ? '#10b981' : '#818cf8'}
-                              stroke="#0f172a"
+                              fill={isStart ? '#2f5d3a' : '#1f3f66'}
+                              stroke="#fffdf7"
                               strokeWidth="1.5"
                             >
                               <title>{`${isStart ? 'Start' : `Step ${index}`}: cylinder ${value}`}</title>
                             </circle>
-                            <text x={x} y={y - 7} fill="#cbd5e1" fontSize="10" textAnchor="middle" fontFamily="monospace">
+                            <text x={x} y={y - 7} fill="#4c463c" fontSize="10" textAnchor="middle" fontFamily="monospace">
                               {value}
                             </text>
                           </g>
@@ -454,7 +454,7 @@ export const DiskSchedulingView: React.FC<DiskSchedulingViewProps> = ({
               </svg>
             </div>
 
-            <div className="mt-2 flex justify-between px-6 font-mono text-[11px] text-slate-500">
+            <div className="mt-2 flex justify-between px-6 font-mono text-[11px] text-ink-muted">
               <span>Cylinder 0</span>
               <span>Cylinder {Math.round(maxCylinder / 2)}</span>
               <span>Cylinder {maxCylinder}</span>
@@ -462,38 +462,38 @@ export const DiskSchedulingView: React.FC<DiskSchedulingViewProps> = ({
           </div>
         </section>
 
-        <section className="rounded-lg border border-slate-800 bg-slate-900 p-4 lg:col-span-5" aria-labelledby="disk-steps-heading">
+        <section className="rounded-lg border border-rule bg-sheet p-4 lg:col-span-5" aria-labelledby="disk-steps-heading">
           <div className="mb-3">
-            <h2 id="disk-steps-heading" className="text-sm font-semibold text-slate-200">
+            <h2 id="disk-steps-heading" className="text-sm font-semibold text-ink">
               Seek steps
             </h2>
-            <p className="mt-0.5 text-xs text-slate-500">Each row is one movement of the arm.</p>
+            <p className="mt-0.5 text-xs text-ink-muted">Each row is one movement of the arm.</p>
           </div>
 
           <div className="max-h-72 overflow-y-auto">
             <table className="w-full border-collapse text-left text-xs font-mono">
-              <thead className="sticky top-0 bg-slate-900">
-                <tr className="border-b border-slate-800 text-slate-400">
+              <thead className="sticky top-0 bg-sheet">
+                <tr className="border-b border-rule text-ink-muted">
                   <th scope="col" className="px-2 py-2 font-medium">#</th>
                   <th scope="col" className="px-2 py-2 font-medium">From</th>
                   <th scope="col" className="px-2 py-2 font-medium">To</th>
-                  <th scope="col" className="px-2 py-2 font-medium text-indigo-400">Seek</th>
+                  <th scope="col" className="px-2 py-2 font-medium text-accent">Seek</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800">
+              <tbody className="divide-y divide-rule">
                 {result.steps.map((step) => (
-                  <tr key={step.step} className="transition-colors hover:bg-slate-800/40">
-                    <td className="px-2 py-2 text-slate-500">{step.step}</td>
-                    <td className="px-2 py-2 text-slate-300">{step.from}</td>
-                    <td className="px-2 py-2 font-semibold text-slate-200">{step.to}</td>
-                    <td className="px-2 py-2 font-semibold text-indigo-400">+{step.distance}</td>
+                  <tr key={step.step} className="transition-colors hover:bg-wash">
+                    <td className="px-2 py-2 text-ink-muted">{step.step}</td>
+                    <td className="px-2 py-2 text-ink-soft">{step.from}</td>
+                    <td className="px-2 py-2 font-semibold text-ink">{step.to}</td>
+                    <td className="px-2 py-2 font-semibold text-accent">+{step.distance}</td>
                   </tr>
                 ))}
-                <tr className="border-t border-slate-700 bg-slate-950/60 font-semibold">
-                  <td colSpan={3} className="px-2 py-2 text-right text-[11px] font-medium text-slate-400">
+                <tr className="border-t border-rule-strong bg-well font-semibold">
+                  <td colSpan={3} className="px-2 py-2 text-right text-[11px] font-medium text-ink-muted">
                     Total
                   </td>
-                  <td className="px-2 py-2 font-mono text-sm text-emerald-400">{result.totalHeadMovement}</td>
+                  <td className="px-2 py-2 font-mono text-sm text-good">{result.totalHeadMovement}</td>
                 </tr>
               </tbody>
             </table>
@@ -502,18 +502,18 @@ export const DiskSchedulingView: React.FC<DiskSchedulingViewProps> = ({
       </div>
 
       {showComparison && (
-        <section className="space-y-4 rounded-lg border border-amber-500/30 bg-slate-900 p-5" aria-labelledby="disk-comparison-heading">
+        <section className="space-y-4 rounded-lg border border-warn-line/30 bg-sheet p-5" aria-labelledby="disk-comparison-heading">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div>
-              <h2 id="disk-comparison-heading" className="text-sm font-semibold text-slate-100">
+              <h2 id="disk-comparison-heading" className="text-sm font-semibold text-ink">
                 All six policies on this queue
               </h2>
-              <p className="mt-1 text-xs text-slate-400">
+              <p className="mt-1 text-xs text-ink-muted">
                 Same requests and starting cylinder. Lower head movement is better.
               </p>
             </div>
             {bestAlgo && (
-              <p className="text-xs text-emerald-300">
+              <p className="text-xs text-good">
                 Shortest path: <strong className="font-semibold">{bestAlgo.name}</strong> ({bestAlgo.result.totalHeadMovement} cylinders)
               </p>
             )}
@@ -526,13 +526,13 @@ export const DiskSchedulingView: React.FC<DiskSchedulingViewProps> = ({
                 <div
                   key={algo}
                   className={`rounded-lg border p-3.5 ${
-                    isBest ? 'border-emerald-500/40 bg-emerald-950/20' : 'border-slate-800 bg-slate-950/60'
+                    isBest ? 'border-good-line/40 bg-good-bg' : 'border-rule bg-well'
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-medium text-slate-200">{name}</span>
+                    <span className="text-xs font-medium text-ink">{name}</span>
                     {isBest && (
-                      <span className="rounded bg-emerald-950 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-300">
+                      <span className="rounded bg-good-bg px-1.5 py-0.5 text-[10px] font-semibold text-good">
                         Shortest
                       </span>
                     )}
@@ -540,12 +540,12 @@ export const DiskSchedulingView: React.FC<DiskSchedulingViewProps> = ({
 
                   <dl className="mt-2.5 space-y-1 font-mono text-xs">
                     <div className="flex justify-between gap-3">
-                      <dt className="text-slate-500">Head movement</dt>
-                      <dd className="font-semibold text-indigo-300">{comparison.totalHeadMovement} cyl</dd>
+                      <dt className="text-ink-muted">Head movement</dt>
+                      <dd className="font-semibold text-accent">{comparison.totalHeadMovement} cyl</dd>
                     </div>
                     <div className="flex justify-between gap-3">
-                      <dt className="text-slate-500">Average seek</dt>
-                      <dd className="text-emerald-300">{comparison.avgSeekLength} cyl</dd>
+                      <dt className="text-ink-muted">Average seek</dt>
+                      <dd className="text-good">{comparison.avgSeekLength} cyl</dd>
                     </div>
                   </dl>
                 </div>
@@ -555,18 +555,18 @@ export const DiskSchedulingView: React.FC<DiskSchedulingViewProps> = ({
         </section>
       )}
 
-      <section className="overflow-hidden rounded-lg border border-slate-800 bg-slate-900/60">
+      <section className="overflow-hidden rounded-lg border border-rule bg-sheet">
         <button
           type="button"
           onClick={() => setShowLogs((value) => !value)}
           aria-expanded={showLogs}
-          className="flex w-full items-center justify-between px-4 py-3 text-xs font-medium text-slate-400 transition-colors hover:text-slate-200"
+          className="flex w-full items-center justify-between px-4 py-3 text-xs font-medium text-ink-muted transition-colors hover:text-ink"
         >
           <span>Disk log ({result.executionLogs.length} entries)</span>
-          <span className="text-indigo-400">{showLogs ? 'Hide' : 'Show'}</span>
+          <span className="text-accent">{showLogs ? 'Hide' : 'Show'}</span>
         </button>
         {showLogs && (
-          <div className="max-h-56 space-y-1 overflow-y-auto border-t border-slate-800 bg-slate-950 p-4 font-mono text-xs leading-relaxed text-slate-300">
+          <div className="max-h-56 space-y-1 overflow-y-auto border-t border-rule bg-well p-4 font-mono text-xs leading-relaxed text-ink-soft">
             {result.executionLogs.map((log, index) => (
               <p key={index}>{log}</p>
             ))}

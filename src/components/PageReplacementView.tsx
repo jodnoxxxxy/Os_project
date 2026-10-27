@@ -113,20 +113,20 @@ export const PageReplacementView: React.FC<PageReplacementViewProps> = ({
 
   return (
     <div className="space-y-6">
-      <header className="flex flex-col gap-4 border-b border-slate-800 pb-5 md:flex-row md:items-end md:justify-between">
+      <header className="pb-0">
         <div className="max-w-2xl">
-          <p className="text-xs font-medium text-indigo-400">Module 2</p>
-          <h1 className="mt-1 flex items-center gap-2 text-xl font-semibold text-slate-100">
-            <Layers className="h-5 w-5 text-indigo-400" aria-hidden="true" />
+          <p className="eyebrow">Module 2</p>
+          <h1 className="mt-1 flex items-center gap-2 text-xl font-semibold text-ink">
+            <Layers className="h-5 w-5 text-accent" aria-hidden="true" />
             Page replacement
           </h1>
-          <p className="mt-1.5 text-sm leading-relaxed text-slate-400">
+          <p className="mt-1.5 text-sm leading-relaxed text-ink-muted">
             A reference string is the list of pages the CPU asks for, in order. A hit means the page is
             already in a frame; a fault means it has to be loaded, and sometimes another page is evicted.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-1 rounded-lg border border-slate-800 bg-slate-900 p-1">
+        <div className="-mb-px mt-5 flex items-center gap-x-6 overflow-x-auto border-b border-rule scrollbar-none">
           {ALGORITHMS.map((algo) => (
             <button
               key={algo.id}
@@ -134,10 +134,10 @@ export const PageReplacementView: React.FC<PageReplacementViewProps> = ({
               onClick={() => setSelectedAlgo(algo.id)}
               title={algo.hint}
               aria-pressed={selectedAlgo === algo.id}
-              className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+              className={`-mb-px shrink-0 border-b-2 pb-2 text-xs transition-colors ${
                 selectedAlgo === algo.id
-                  ? 'bg-indigo-600 text-white'
-                  : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
+                  ? 'border-accent font-medium text-ink'
+                  : 'border-transparent text-ink-muted hover:text-ink'
               }`}
             >
               {algo.label}
@@ -146,13 +146,13 @@ export const PageReplacementView: React.FC<PageReplacementViewProps> = ({
         </div>
       </header>
 
-      <section className="space-y-4 rounded-lg border border-slate-800 bg-slate-900 p-4" aria-labelledby="page-input-heading">
+      <section className="space-y-4 rounded-lg border border-rule bg-sheet p-4" aria-labelledby="page-input-heading">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 id="page-input-heading" className="text-sm font-semibold text-slate-200">
+          <h2 id="page-input-heading" className="text-sm font-semibold text-ink">
             Inputs
           </h2>
-          <p className="text-xs text-slate-500">
-            <span className="font-medium text-slate-300">{getPageAlgorithmName(selectedAlgo)}</span>
+          <p className="text-xs text-ink-muted">
+            <span className="font-medium text-ink-soft">{getPageAlgorithmName(selectedAlgo)}</span>
             <span className="mx-1.5">·</span>
             {activeHint}
           </p>
@@ -160,7 +160,7 @@ export const PageReplacementView: React.FC<PageReplacementViewProps> = ({
 
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end">
           <div className="flex-1">
-            <label htmlFor="page-reference" className="mb-1 block text-xs font-medium text-slate-300">
+            <label htmlFor="page-reference" className="mb-1 block text-xs font-medium text-ink-soft">
               Page reference string
             </label>
             <input
@@ -176,21 +176,21 @@ export const PageReplacementView: React.FC<PageReplacementViewProps> = ({
               onChange={(event) => handleStringChange(event.target.value)}
               aria-describedby="page-reference-help"
               aria-invalid={inputMessage ? true : undefined}
-              className={`w-full rounded border bg-slate-950 px-3 py-1.5 font-mono text-xs text-indigo-200 focus:outline-none ${
-                inputMessage ? 'border-rose-500/60 focus:border-rose-400' : 'border-slate-700 focus:border-indigo-500'
+              className={`w-full rounded border bg-well px-3 py-1.5 font-mono text-xs text-accent focus:outline-none ${
+                inputMessage ? 'border-bad-line/60 focus:border-bad-line' : 'border-rule-strong focus:border-accent'
               }`}
               placeholder="7, 0, 1, 2, 0, 3, 0, 4"
             />
             <p
               id="page-reference-help"
-              className={`mt-1 text-[11px] ${inputMessage ? 'text-rose-300' : 'text-slate-500'}`}
+              className={`mt-1 text-[11px] ${inputMessage ? 'text-bad' : 'text-ink-muted'}`}
             >
               {inputMessage ?? `${referenceString.length} references loaded. Separate numbers with commas or spaces.`}
             </p>
           </div>
 
           <div>
-            <span className="mb-1 block text-xs font-medium text-slate-300">Frames available</span>
+            <span className="mb-1 block text-xs font-medium text-ink-soft">Frames available</span>
             <div className="flex items-center gap-1" role="group" aria-label="Number of page frames">
               {FRAME_OPTIONS.map((count) => (
                 <button
@@ -201,8 +201,8 @@ export const PageReplacementView: React.FC<PageReplacementViewProps> = ({
                   title={`${count} physical frames`}
                   className={`h-8 w-8 rounded font-mono text-xs font-semibold transition-colors ${
                     frameCount === count
-                      ? 'bg-indigo-600 text-white'
-                      : 'border border-slate-700 bg-slate-800 text-slate-400 hover:text-slate-200'
+                      ? 'bg-accent text-white'
+                      : 'border border-rule-strong bg-wash text-ink-muted hover:text-ink'
                   }`}
                 >
                   {count}
@@ -218,8 +218,8 @@ export const PageReplacementView: React.FC<PageReplacementViewProps> = ({
               aria-pressed={showComparison}
               className={`flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium transition-colors ${
                 showComparison
-                  ? 'border-amber-500/50 bg-amber-500/15 text-amber-200'
-                  : 'border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700'
+                  ? 'border-warn-line/50 bg-warn text-warn'
+                  : 'border-rule-strong bg-wash text-ink hover:bg-rule'
               }`}
             >
               <BarChart3 className="h-3.5 w-3.5" aria-hidden="true" />
@@ -228,21 +228,21 @@ export const PageReplacementView: React.FC<PageReplacementViewProps> = ({
             <button
               type="button"
               onClick={onResetDefaults}
-              className="flex items-center gap-1 rounded-md border border-slate-700 bg-slate-800 px-2.5 py-1.5 text-xs font-medium text-slate-200 transition-colors hover:bg-slate-700"
+              className="flex items-center gap-1 rounded-md border border-rule-strong bg-wash px-2.5 py-1.5 text-xs font-medium text-ink transition-colors hover:bg-rule"
             >
-              <RotateCcw className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
+              <RotateCcw className="h-3.5 w-3.5 text-ink-muted" aria-hidden="true" />
               Reset
             </button>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 border-t border-slate-800 pt-3 text-xs">
-          <span className="text-slate-500">Examples:</span>
+        <div className="flex flex-wrap items-center gap-2 border-t border-rule pt-3 text-xs">
+          <span className="text-ink-muted">Examples:</span>
           <button
             type="button"
             onClick={() => loadPreset(DEFAULT_PAGE_REFERENCE_STRING)}
             title="The 20-reference string used in most operating systems textbooks"
-            className="rounded border border-slate-700 bg-slate-800 px-2.5 py-1 text-slate-300 transition-colors hover:bg-slate-700"
+            className="rounded border border-rule-strong bg-wash px-2.5 py-1 text-ink-soft transition-colors hover:bg-rule"
           >
             Textbook trace (20 pages)
           </button>
@@ -250,7 +250,7 @@ export const PageReplacementView: React.FC<PageReplacementViewProps> = ({
             type="button"
             onClick={() => loadPreset([1, 2, 3, 4, 1, 2, 5, 1, 2, 3, 4, 5])}
             title="With FIFO, more frames can sometimes cause more faults"
-            className="rounded border border-slate-700 bg-slate-800 px-2.5 py-1 text-slate-300 transition-colors hover:bg-slate-700"
+            className="rounded border border-rule-strong bg-wash px-2.5 py-1 text-ink-soft transition-colors hover:bg-rule"
           >
             Belady's anomaly
           </button>
@@ -258,86 +258,86 @@ export const PageReplacementView: React.FC<PageReplacementViewProps> = ({
             type="button"
             onClick={() => loadPreset([1, 2, 3, 2, 1, 5, 2, 1, 6, 2, 5, 6, 3, 1, 3, 6, 1, 2, 4, 3])}
             title="Repeated nearby pages, which favours LRU"
-            className="rounded border border-slate-700 bg-slate-800 px-2.5 py-1 text-slate-300 transition-colors hover:bg-slate-700"
+            className="rounded border border-rule-strong bg-wash px-2.5 py-1 text-ink-soft transition-colors hover:bg-rule"
           >
             High locality
           </button>
           <button
             type="button"
             onClick={() => loadPreset(Array.from({ length: 16 }, () => Math.floor(Math.random() * 8)))}
-            className="flex items-center gap-1 rounded border border-slate-700 bg-slate-800 px-2.5 py-1 text-slate-300 transition-colors hover:bg-slate-700"
+            className="flex items-center gap-1 rounded border border-rule-strong bg-wash px-2.5 py-1 text-ink-soft transition-colors hover:bg-rule"
           >
-            <Shuffle className="h-3 w-3 text-amber-400" aria-hidden="true" />
+            <Shuffle className="h-3 w-3 text-warn" aria-hidden="true" />
             Random 16
           </button>
         </div>
       </section>
 
-      <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <div className="rounded-lg border border-slate-800 bg-slate-900 p-3">
-          <dt className="text-[11px] font-medium text-slate-400">Page faults</dt>
-          <dd className="mt-1 font-mono text-2xl font-semibold text-rose-400">{result.totalFaults}</dd>
-          <dd className="mt-0.5 text-[10px] text-slate-500">pages that had to be loaded</dd>
+      <dl className="grid grid-cols-2 border-y border-rule sm:grid-cols-4">
+        <div className="px-4 py-3.5">
+          <dt className="text-[11px] font-medium text-ink-muted">Page faults</dt>
+          <dd className="mt-1 font-mono text-2xl font-semibold text-ink">{result.totalFaults}</dd>
+          <dd className="mt-0.5 text-[10px] text-ink-muted">pages that had to be loaded</dd>
         </div>
-        <div className="rounded-lg border border-slate-800 bg-slate-900 p-3">
-          <dt className="text-[11px] font-medium text-slate-400">Page hits</dt>
-          <dd className="mt-1 font-mono text-2xl font-semibold text-emerald-400">{result.totalHits}</dd>
-          <dd className="mt-0.5 text-[10px] text-slate-500">pages already in memory</dd>
+        <div className="border-l border-rule px-4 py-3.5">
+          <dt className="text-[11px] font-medium text-ink-muted">Page hits</dt>
+          <dd className="mt-1 font-mono text-2xl font-semibold text-ink">{result.totalHits}</dd>
+          <dd className="mt-0.5 text-[10px] text-ink-muted">pages already in memory</dd>
         </div>
-        <div className="rounded-lg border border-slate-800 bg-slate-900 p-3">
-          <dt className="text-[11px] font-medium text-slate-400">Hit rate</dt>
-          <dd className="mt-1 font-mono text-2xl font-semibold text-indigo-400">{result.hitRatio}%</dd>
-          <dd className="mt-0.5 text-[10px] text-slate-500">hits / references</dd>
+        <div className="border-t border-rule px-4 py-3.5 sm:border-l sm:border-t-0">
+          <dt className="text-[11px] font-medium text-ink-muted">Hit rate</dt>
+          <dd className="mt-1 font-mono text-2xl font-semibold text-ink">{result.hitRatio}%</dd>
+          <dd className="mt-0.5 text-[10px] text-ink-muted">hits / references</dd>
         </div>
-        <div className="rounded-lg border border-slate-800 bg-slate-900 p-3">
-          <dt className="text-[11px] font-medium text-slate-400">Fault rate</dt>
-          <dd className="mt-1 font-mono text-2xl font-semibold text-amber-400">{result.faultRatio}%</dd>
-          <dd className="mt-0.5 text-[10px] text-slate-500">faults / references</dd>
+        <div className="border-l border-t border-rule px-4 py-3.5 sm:border-t-0">
+          <dt className="text-[11px] font-medium text-ink-muted">Fault rate</dt>
+          <dd className="mt-1 font-mono text-2xl font-semibold text-ink">{result.faultRatio}%</dd>
+          <dd className="mt-0.5 text-[10px] text-ink-muted">faults / references</dd>
         </div>
       </dl>
 
-      <section className="rounded-lg border border-slate-800 bg-slate-900 p-4" aria-labelledby="frames-heading">
+      <section className="rounded-lg border border-rule bg-sheet p-4" aria-labelledby="frames-heading">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <div>
-            <h2 id="frames-heading" className="text-sm font-semibold text-slate-200">
+            <h2 id="frames-heading" className="text-sm font-semibold text-ink">
               Frame contents, step by step
             </h2>
-            <p className="mt-0.5 text-xs text-slate-500">{result.algorithmName} with {frameCount} frames</p>
+            <p className="mt-0.5 text-xs text-ink-muted">{result.algorithmName} with {frameCount} frames</p>
           </div>
-          <div className="flex items-center gap-3 text-[11px] text-slate-400">
+          <div className="flex items-center gap-3 text-[11px] text-ink-muted">
             <span className="flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" aria-hidden="true" />
+              <span className="h-2.5 w-2.5 rounded-full bg-good" aria-hidden="true" />
               Hit
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-rose-500" aria-hidden="true" />
+              <span className="h-2.5 w-2.5 rounded-full bg-bad" aria-hidden="true" />
               Fault
             </span>
           </div>
         </div>
 
-        <p className="mb-2 text-[11px] text-slate-500 sm:hidden">Scroll sideways to see every step.</p>
+        <p className="mb-2 text-[11px] text-ink-muted sm:hidden">Scroll sideways to see every step.</p>
 
         <div className="overflow-x-auto pb-2">
           <div className="inline-block min-w-full">
             <table className="border-collapse text-center text-xs font-mono">
               <thead>
                 <tr>
-                  <th scope="col" className="sticky left-0 z-10 border-b border-slate-800 bg-slate-950 px-3 py-2 text-left font-sans font-medium text-slate-400">
+                  <th scope="col" className="sticky left-0 z-10 border-b border-rule bg-well px-3 py-2 text-left font-sans font-medium text-ink-muted">
                     Step
                   </th>
                   {result.steps.map((step) => (
-                    <th key={step.step} scope="col" className="min-w-[42px] border-b border-slate-800 px-2 py-2 font-medium text-slate-400">
+                    <th key={step.step} scope="col" className="min-w-[42px] border-b border-rule px-2 py-2 font-medium text-ink-muted">
                       {step.step}
                     </th>
                   ))}
                 </tr>
-                <tr className="bg-slate-950/50">
-                  <th scope="col" className="sticky left-0 z-10 border-b border-slate-800 bg-slate-950 px-3 py-2 text-left font-sans font-medium text-indigo-300">
+                <tr className="bg-well">
+                  <th scope="col" className="sticky left-0 z-10 border-b border-rule bg-well px-3 py-2 text-left font-sans font-medium text-accent">
                     Page
                   </th>
                   {result.steps.map((step) => (
-                    <th key={step.step} scope="col" className="border-b border-slate-800 px-2 py-2 text-sm font-semibold text-indigo-300">
+                    <th key={step.step} scope="col" className="border-b border-rule px-2 py-2 text-sm font-semibold text-accent">
                       {step.page}
                     </th>
                   ))}
@@ -345,8 +345,8 @@ export const PageReplacementView: React.FC<PageReplacementViewProps> = ({
               </thead>
               <tbody>
                 {Array.from({ length: frameCount }).map((_, frameIndex) => (
-                  <tr key={frameIndex} className="border-b border-slate-800 transition-colors hover:bg-slate-800/30">
-                    <th scope="row" className="sticky left-0 z-10 border-r border-slate-800 bg-slate-950 px-3 py-2 text-left font-sans font-medium text-slate-400">
+                  <tr key={frameIndex} className="border-b border-rule transition-colors hover:bg-wash">
+                    <th scope="row" className="sticky left-0 z-10 border-r border-rule bg-well px-3 py-2 text-left font-sans font-medium text-ink-muted">
                       Frame {frameIndex + 1}
                     </th>
                     {result.steps.map((step) => {
@@ -356,30 +356,30 @@ export const PageReplacementView: React.FC<PageReplacementViewProps> = ({
                       return (
                         <td
                           key={step.step}
-                          className={`border-r border-slate-800 px-2 py-2 ${
+                          className={`border-r border-rule px-2 py-2 ${
                             isTargetPage
                               ? step.isHit
-                                ? 'bg-emerald-950/40 font-semibold text-emerald-300'
-                                : 'bg-rose-950/30 font-semibold text-rose-300'
-                              : 'text-slate-300'
+                                ? 'bg-good-bg font-semibold text-good'
+                                : 'bg-bad-bg font-semibold text-bad'
+                              : 'text-ink-soft'
                           }`}
                         >
-                          {pageInFrame !== null ? pageInFrame : <span className="text-slate-600">-</span>}
+                          {pageInFrame !== null ? pageInFrame : <span className="text-ink-muted">-</span>}
                         </td>
                       );
                     })}
                   </tr>
                 ))}
 
-                <tr className="border-t-2 border-slate-700 bg-slate-950 font-semibold">
-                  <th scope="row" className="sticky left-0 z-10 border-r border-slate-800 bg-slate-950 px-3 py-2 text-left font-sans font-medium text-slate-300">
+                <tr className="border-t-2 border-rule-strong bg-well font-semibold">
+                  <th scope="row" className="sticky left-0 z-10 border-r border-rule bg-well px-3 py-2 text-left font-sans font-medium text-ink-soft">
                     Status
                   </th>
                   {result.steps.map((step) => (
                     <td
                       key={step.step}
                       className={`px-1 py-2 text-[10px] ${
-                        step.isHit ? 'bg-emerald-950/30 text-emerald-400' : 'bg-rose-950/30 text-rose-400'
+                        step.isHit ? 'bg-good-bg text-good' : 'bg-bad-bg text-bad'
                       }`}
                     >
                       {step.isHit ? 'HIT' : 'FAULT'}
@@ -387,12 +387,12 @@ export const PageReplacementView: React.FC<PageReplacementViewProps> = ({
                   ))}
                 </tr>
 
-                <tr className="bg-slate-950/60">
-                  <th scope="row" className="sticky left-0 z-10 border-r border-slate-800 bg-slate-950 px-3 py-2 text-left font-sans text-[11px] font-medium text-slate-500">
+                <tr className="bg-well">
+                  <th scope="row" className="sticky left-0 z-10 border-r border-rule bg-well px-3 py-2 text-left font-sans text-[11px] font-medium text-ink-muted">
                     Evicted
                   </th>
                   {result.steps.map((step) => (
-                    <td key={step.step} className="px-1 py-2 text-[11px] text-amber-300/80">
+                    <td key={step.step} className="px-1 py-2 text-[11px] text-warn/80">
                       {step.replacedPage !== null && step.replacedPage !== undefined ? step.replacedPage : ''}
                     </td>
                   ))}
@@ -404,16 +404,16 @@ export const PageReplacementView: React.FC<PageReplacementViewProps> = ({
       </section>
 
       {showComparison && (
-        <section className="space-y-4 rounded-lg border border-amber-500/30 bg-slate-900 p-5" aria-labelledby="page-comparison-heading">
+        <section className="space-y-4 rounded-lg border border-warn-line/30 bg-sheet p-5" aria-labelledby="page-comparison-heading">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div>
-              <h2 id="page-comparison-heading" className="text-sm font-semibold text-slate-100">
+              <h2 id="page-comparison-heading" className="text-sm font-semibold text-ink">
                 All four policies on this trace
               </h2>
-              <p className="mt-1 text-xs text-slate-400">Lower fault counts are better.</p>
+              <p className="mt-1 text-xs text-ink-muted">Lower fault counts are better.</p>
             </div>
             {bestAlgo && (
-              <p className="text-xs text-emerald-300">
+              <p className="text-xs text-good">
                 Fewest faults: <strong className="font-semibold">{bestAlgo.name}</strong> ({bestAlgo.result.totalFaults})
               </p>
             )}
@@ -426,13 +426,13 @@ export const PageReplacementView: React.FC<PageReplacementViewProps> = ({
                 <div
                   key={algo}
                   className={`rounded-lg border p-3.5 ${
-                    isBest ? 'border-emerald-500/40 bg-emerald-950/20' : 'border-slate-800 bg-slate-950/60'
+                    isBest ? 'border-good-line/40 bg-good-bg' : 'border-rule bg-well'
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-medium text-slate-200">{name}</span>
+                    <span className="text-xs font-medium text-ink">{name}</span>
                     {isBest && (
-                      <span className="rounded bg-emerald-950 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-300">
+                      <span className="rounded bg-good-bg px-1.5 py-0.5 text-[10px] font-semibold text-good">
                         Fewest
                       </span>
                     )}
@@ -440,16 +440,16 @@ export const PageReplacementView: React.FC<PageReplacementViewProps> = ({
 
                   <dl className="mt-2.5 space-y-1 font-mono text-xs">
                     <div className="flex justify-between gap-3">
-                      <dt className="text-slate-500">Faults</dt>
-                      <dd className="font-semibold text-rose-300">{comparison.totalFaults}</dd>
+                      <dt className="text-ink-muted">Faults</dt>
+                      <dd className="font-semibold text-bad">{comparison.totalFaults}</dd>
                     </div>
                     <div className="flex justify-between gap-3">
-                      <dt className="text-slate-500">Hits</dt>
-                      <dd className="text-emerald-300">{comparison.totalHits}</dd>
+                      <dt className="text-ink-muted">Hits</dt>
+                      <dd className="text-good">{comparison.totalHits}</dd>
                     </div>
                     <div className="flex justify-between gap-3">
-                      <dt className="text-slate-500">Hit rate</dt>
-                      <dd className="text-indigo-300">{comparison.hitRatio}%</dd>
+                      <dt className="text-ink-muted">Hit rate</dt>
+                      <dd className="text-accent">{comparison.hitRatio}%</dd>
                     </div>
                   </dl>
                 </div>
@@ -457,8 +457,8 @@ export const PageReplacementView: React.FC<PageReplacementViewProps> = ({
             })}
           </div>
 
-          <p className="flex items-start gap-2 rounded border border-slate-800 bg-slate-950 p-3 text-[11px] leading-relaxed text-slate-400">
-            <Info className="mt-0.5 h-4 w-4 shrink-0 text-indigo-400" aria-hidden="true" />
+          <p className="flex items-start gap-2 rounded border border-rule bg-well p-3 text-[11px] leading-relaxed text-ink-muted">
+            <Info className="mt-0.5 h-4 w-4 shrink-0 text-accent" aria-hidden="true" />
             <span>
               Optimal replacement is the best result possible for this trace because it can see future
               references. Real systems cannot, so LRU uses recent history as an approximation.
@@ -467,18 +467,18 @@ export const PageReplacementView: React.FC<PageReplacementViewProps> = ({
         </section>
       )}
 
-      <section className="overflow-hidden rounded-lg border border-slate-800 bg-slate-900/60">
+      <section className="overflow-hidden rounded-lg border border-rule bg-sheet">
         <button
           type="button"
           onClick={() => setShowLogs((value) => !value)}
           aria-expanded={showLogs}
-          className="flex w-full items-center justify-between px-4 py-3 text-xs font-medium text-slate-400 transition-colors hover:text-slate-200"
+          className="flex w-full items-center justify-between px-4 py-3 text-xs font-medium text-ink-muted transition-colors hover:text-ink"
         >
           <span>Replacement log ({result.executionLogs.length} entries)</span>
-          <span className="text-indigo-400">{showLogs ? 'Hide' : 'Show'}</span>
+          <span className="text-accent">{showLogs ? 'Hide' : 'Show'}</span>
         </button>
         {showLogs && (
-          <div className="max-h-56 space-y-1 overflow-y-auto border-t border-slate-800 bg-slate-950 p-4 font-mono text-xs leading-relaxed text-slate-300">
+          <div className="max-h-56 space-y-1 overflow-y-auto border-t border-rule bg-well p-4 font-mono text-xs leading-relaxed text-ink-soft">
             {result.executionLogs.map((log, index) => (
               <p key={index}>{log}</p>
             ))}

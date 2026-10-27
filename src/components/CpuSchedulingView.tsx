@@ -11,7 +11,7 @@ interface CpuSchedulingViewProps {
   onUpdateQuantum: (quantum: number) => void;
 }
 
-const COLOR_PALETTE = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#eab308', '#f97316'];
+const COLOR_PALETTE = ['#33608c', '#3c6b50', '#a8762a', '#6a4575', '#9b4a3d', '#2f6f73', '#8a7a2a', '#a85f2a'];
 const MAX_PROCESSES = 10;
 
 const ALGORITHMS: { id: CpuAlgorithm; label: string; hint: string }[] = [
@@ -107,20 +107,20 @@ export const CpuSchedulingView: React.FC<CpuSchedulingViewProps> = ({
 
   return (
     <div className="space-y-6">
-      <header className="flex flex-col gap-4 border-b border-slate-800 pb-5 md:flex-row md:items-end md:justify-between">
+      <header className="pb-0">
         <div className="max-w-2xl">
-          <p className="text-xs font-medium text-indigo-400">Module 1</p>
-          <h1 className="mt-1 flex items-center gap-2 text-xl font-semibold text-slate-100">
-            <Cpu className="h-5 w-5 text-indigo-400" aria-hidden="true" />
+          <p className="eyebrow">Module 1</p>
+          <h1 className="mt-1 flex items-center gap-2 text-xl font-semibold text-ink">
+            <Cpu className="h-5 w-5 text-accent" aria-hidden="true" />
             CPU scheduling
           </h1>
-          <p className="mt-1.5 text-sm leading-relaxed text-slate-400">
+          <p className="mt-1.5 text-sm leading-relaxed text-ink-muted">
             Enter the processes once, then switch between scheduling policies. The Gantt chart and
             the numbers update immediately, which makes it easy to compare one policy against another.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-1 rounded-lg border border-slate-800 bg-slate-900 p-1">
+        <div className="-mb-px mt-5 flex items-center gap-x-6 overflow-x-auto border-b border-rule scrollbar-none">
           {ALGORITHMS.map((algo) => (
             <button
               key={algo.id}
@@ -128,10 +128,10 @@ export const CpuSchedulingView: React.FC<CpuSchedulingViewProps> = ({
               onClick={() => setSelectedAlgo(algo.id)}
               title={algo.hint}
               aria-pressed={selectedAlgo === algo.id}
-              className={`rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
+              className={`-mb-px shrink-0 border-b-2 pb-2 text-xs transition-colors ${
                 selectedAlgo === algo.id
-                  ? 'bg-indigo-600 text-white'
-                  : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
+                  ? 'border-accent font-medium text-ink'
+                  : 'border-transparent text-ink-muted hover:text-ink'
               }`}
             >
               {algo.label}
@@ -140,16 +140,16 @@ export const CpuSchedulingView: React.FC<CpuSchedulingViewProps> = ({
         </div>
       </header>
 
-      <div className="flex flex-col gap-3 rounded-lg border border-slate-800 bg-slate-900/60 p-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 rounded-lg border border-rule bg-sheet p-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-          <p className="text-sm text-slate-300">
-            <span className="font-medium text-slate-100">{getCpuAlgorithmName(selectedAlgo)}</span>
-            <span className="ml-2 text-slate-500">{activeHint}</span>
+          <p className="text-sm text-ink-soft">
+            <span className="font-medium text-ink">{getCpuAlgorithmName(selectedAlgo)}</span>
+            <span className="ml-2 text-ink-muted">{activeHint}</span>
           </p>
 
           {selectedAlgo === 'RR' && (
-            <label className="flex items-center gap-2 text-xs text-slate-300">
-              <Clock className="h-3.5 w-3.5 text-amber-400" aria-hidden="true" />
+            <label className="flex items-center gap-2 text-xs text-ink-soft">
+              <Clock className="h-3.5 w-3.5 text-warn" aria-hidden="true" />
               Time slice
               <input
                 type="number"
@@ -157,10 +157,10 @@ export const CpuSchedulingView: React.FC<CpuSchedulingViewProps> = ({
                 max={20}
                 value={quantum}
                 onChange={(event) => onUpdateQuantum(Math.max(1, Number.parseInt(event.target.value, 10) || 1))}
-                className="w-14 rounded border border-slate-700 bg-slate-950 px-2 py-1 text-center text-xs text-slate-100 focus:border-indigo-500 focus:outline-none"
+                className="w-14 rounded border border-rule-strong bg-well px-2 py-1 text-center text-xs text-ink focus:border-accent focus:outline-none"
                 aria-label="Round robin time slice"
               />
-              <span className="text-slate-500">ms</span>
+              <span className="text-ink-muted">ms</span>
             </label>
           )}
         </div>
@@ -171,25 +171,25 @@ export const CpuSchedulingView: React.FC<CpuSchedulingViewProps> = ({
             onClick={handleAddProcess}
             disabled={processes.length >= MAX_PROCESSES}
             title={processes.length >= MAX_PROCESSES ? `The table holds up to ${MAX_PROCESSES} processes.` : 'Add a row to the process table'}
-            className="flex items-center gap-1 rounded-md border border-slate-700 bg-slate-800 px-2.5 py-1.5 text-xs font-medium text-slate-200 transition-colors hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex items-center gap-1 rounded-md border border-rule-strong bg-wash px-2.5 py-1.5 text-xs font-medium text-ink transition-colors hover:bg-rule disabled:cursor-not-allowed disabled:opacity-40"
           >
-            <Plus className="h-3.5 w-3.5 text-emerald-400" aria-hidden="true" />
+            <Plus className="h-3.5 w-3.5 text-good" aria-hidden="true" />
             Add process
           </button>
           <button
             type="button"
             onClick={handleRandomize}
-            className="flex items-center gap-1 rounded-md border border-slate-700 bg-slate-800 px-2.5 py-1.5 text-xs font-medium text-slate-200 transition-colors hover:bg-slate-700"
+            className="flex items-center gap-1 rounded-md border border-rule-strong bg-wash px-2.5 py-1.5 text-xs font-medium text-ink transition-colors hover:bg-rule"
           >
-            <Shuffle className="h-3.5 w-3.5 text-amber-400" aria-hidden="true" />
+            <Shuffle className="h-3.5 w-3.5 text-warn" aria-hidden="true" />
             Randomise
           </button>
           <button
             type="button"
             onClick={onResetDefaults}
-            className="flex items-center gap-1 rounded-md border border-slate-700 bg-slate-800 px-2.5 py-1.5 text-xs font-medium text-slate-200 transition-colors hover:bg-slate-700"
+            className="flex items-center gap-1 rounded-md border border-rule-strong bg-wash px-2.5 py-1.5 text-xs font-medium text-ink transition-colors hover:bg-rule"
           >
-            <RotateCcw className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
+            <RotateCcw className="h-3.5 w-3.5 text-ink-muted" aria-hidden="true" />
             Reset example
           </button>
           <button
@@ -198,8 +198,8 @@ export const CpuSchedulingView: React.FC<CpuSchedulingViewProps> = ({
             aria-pressed={showComparison}
             className={`flex items-center gap-1 rounded-md border px-2.5 py-1.5 text-xs font-medium transition-colors ${
               showComparison
-                ? 'border-amber-500/50 bg-amber-500/15 text-amber-200'
-                : 'border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700'
+                ? 'border-warn-line/50 bg-warn text-warn'
+                : 'border-rule-strong bg-wash text-ink hover:bg-rule'
             }`}
           >
             <BarChart3 className="h-3.5 w-3.5" aria-hidden="true" />
@@ -209,15 +209,15 @@ export const CpuSchedulingView: React.FC<CpuSchedulingViewProps> = ({
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-        <section className="lg:col-span-5 rounded-lg border border-slate-800 bg-slate-900 p-4" aria-labelledby="cpu-input-heading">
+        <section className="lg:col-span-5 rounded-lg border border-rule bg-sheet p-4" aria-labelledby="cpu-input-heading">
           <div className="mb-3 flex items-start justify-between gap-3">
             <div>
-              <h2 id="cpu-input-heading" className="text-sm font-semibold text-slate-200">
+              <h2 id="cpu-input-heading" className="text-sm font-semibold text-ink">
                 Processes
               </h2>
-              <p className="mt-0.5 text-xs text-slate-500">{processes.length} of {MAX_PROCESSES} rows used</p>
+              <p className="mt-0.5 text-xs text-ink-muted">{processes.length} of {MAX_PROCESSES} rows used</p>
             </div>
-            <p className="max-w-[9rem] text-right text-[11px] leading-snug text-slate-500">
+            <p className="max-w-[9rem] text-right text-[11px] leading-snug text-ink-muted">
               A lower priority number means a more important process.
             </p>
           </div>
@@ -225,7 +225,7 @@ export const CpuSchedulingView: React.FC<CpuSchedulingViewProps> = ({
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-left text-xs">
               <thead>
-                <tr className="border-b border-slate-800 text-slate-400">
+                <tr className="border-b border-rule text-ink-muted">
                   <th scope="col" className="px-2 py-2 font-medium">Process</th>
                   <th scope="col" className="px-2 py-2 font-medium" title="When the process becomes ready">
                     Arrival
@@ -241,13 +241,13 @@ export const CpuSchedulingView: React.FC<CpuSchedulingViewProps> = ({
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800">
+              <tbody className="divide-y divide-rule">
                 {processes.map((process) => (
-                  <tr key={process.id} className="transition-colors hover:bg-slate-800/40">
+                  <tr key={process.id} className="transition-colors hover:bg-wash">
                     <td className="px-2 py-2">
                       <div className="flex items-center gap-2">
                         <span className="h-3 w-3 rounded-full" style={{ backgroundColor: process.color }} aria-hidden="true" />
-                        <span className="font-mono font-semibold text-slate-200">{process.id}</span>
+                        <span className="font-mono font-semibold text-ink">{process.id}</span>
                       </div>
                     </td>
                     <td className="px-2 py-2">
@@ -259,7 +259,7 @@ export const CpuSchedulingView: React.FC<CpuSchedulingViewProps> = ({
                           handleUpdateProcess(process.id, 'arrivalTime', Number.parseInt(event.target.value, 10) || 0)
                         }
                         aria-label={`${process.id} arrival time`}
-                        className="w-14 rounded border border-slate-800 bg-slate-950 px-1.5 py-1 text-slate-200 focus:border-indigo-500 focus:outline-none"
+                        className="w-14 rounded border border-rule bg-well px-1.5 py-1 text-ink focus:border-accent focus:outline-none"
                       />
                     </td>
                     <td className="px-2 py-2">
@@ -271,7 +271,7 @@ export const CpuSchedulingView: React.FC<CpuSchedulingViewProps> = ({
                           handleUpdateProcess(process.id, 'burstTime', Number.parseInt(event.target.value, 10) || 1)
                         }
                         aria-label={`${process.id} burst time`}
-                        className="w-14 rounded border border-slate-800 bg-slate-950 px-1.5 py-1 text-slate-200 focus:border-indigo-500 focus:outline-none"
+                        className="w-14 rounded border border-rule bg-well px-1.5 py-1 text-ink focus:border-accent focus:outline-none"
                       />
                     </td>
                     <td className="px-2 py-2">
@@ -283,7 +283,7 @@ export const CpuSchedulingView: React.FC<CpuSchedulingViewProps> = ({
                           handleUpdateProcess(process.id, 'priority', Number.parseInt(event.target.value, 10) || 1)
                         }
                         aria-label={`${process.id} priority`}
-                        className="w-14 rounded border border-slate-800 bg-slate-950 px-1.5 py-1 text-slate-200 focus:border-indigo-500 focus:outline-none"
+                        className="w-14 rounded border border-rule bg-well px-1.5 py-1 text-ink focus:border-accent focus:outline-none"
                       />
                     </td>
                     <td className="px-1 py-2 text-center">
@@ -293,7 +293,7 @@ export const CpuSchedulingView: React.FC<CpuSchedulingViewProps> = ({
                         disabled={processes.length <= 1}
                         title={processes.length <= 1 ? 'Keep at least one process' : `Remove ${process.id}`}
                         aria-label={`Remove ${process.id}`}
-                        className="rounded p-1 text-slate-500 transition-colors hover:text-rose-400 disabled:cursor-not-allowed disabled:opacity-20"
+                        className="rounded p-1 text-ink-muted transition-colors hover:text-bad disabled:cursor-not-allowed disabled:opacity-20"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
@@ -305,7 +305,7 @@ export const CpuSchedulingView: React.FC<CpuSchedulingViewProps> = ({
           </div>
 
           {processes.length >= MAX_PROCESSES && (
-            <p className="mt-3 flex items-start gap-1.5 text-[11px] text-amber-300/80">
+            <p className="mt-3 flex items-start gap-1.5 text-[11px] text-warn/80">
               <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
               The table is full. Remove a row before adding another process.
             </p>
@@ -313,44 +313,44 @@ export const CpuSchedulingView: React.FC<CpuSchedulingViewProps> = ({
         </section>
 
         <div className="flex flex-col justify-between gap-4 lg:col-span-7">
-          <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <div className="rounded-lg border border-slate-800 bg-slate-900 p-3">
-              <dt className="text-[11px] font-medium text-slate-400">Average waiting</dt>
-              <dd className="mt-1 font-mono text-xl font-semibold text-indigo-400">
-                {result.avgWaitingTime}<span className="ml-1 text-xs font-normal text-slate-500">ms</span>
+          <dl className="grid grid-cols-2 border-y border-rule sm:grid-cols-4">
+            <div className="px-4 py-3.5">
+              <dt className="text-[11px] font-medium text-ink-muted">Average waiting</dt>
+              <dd className="mt-1 font-mono text-xl font-semibold text-ink">
+                {result.avgWaitingTime}<span className="ml-1 text-xs font-normal text-ink-muted">ms</span>
               </dd>
-              <dd className="mt-0.5 font-mono text-[10px] text-slate-500">TAT - burst</dd>
+              <dd className="mt-0.5 font-mono text-[10px] text-ink-muted">TAT - burst</dd>
             </div>
-            <div className="rounded-lg border border-slate-800 bg-slate-900 p-3">
-              <dt className="text-[11px] font-medium text-slate-400">Average turnaround</dt>
-              <dd className="mt-1 font-mono text-xl font-semibold text-emerald-400">
-                {result.avgTurnaroundTime}<span className="ml-1 text-xs font-normal text-slate-500">ms</span>
+            <div className="border-l border-rule px-4 py-3.5">
+              <dt className="text-[11px] font-medium text-ink-muted">Average turnaround</dt>
+              <dd className="mt-1 font-mono text-xl font-semibold text-ink">
+                {result.avgTurnaroundTime}<span className="ml-1 text-xs font-normal text-ink-muted">ms</span>
               </dd>
-              <dd className="mt-0.5 font-mono text-[10px] text-slate-500">completion - arrival</dd>
+              <dd className="mt-0.5 font-mono text-[10px] text-ink-muted">completion - arrival</dd>
             </div>
-            <div className="rounded-lg border border-slate-800 bg-slate-900 p-3">
-              <dt className="text-[11px] font-medium text-slate-400">CPU utilisation</dt>
-              <dd className="mt-1 font-mono text-xl font-semibold text-amber-400">{result.cpuUtilization}%</dd>
-              <dd className="mt-0.5 font-mono text-[10px] text-slate-500">busy / total time</dd>
+            <div className="border-t border-rule px-4 py-3.5 sm:border-l sm:border-t-0">
+              <dt className="text-[11px] font-medium text-ink-muted">CPU utilisation</dt>
+              <dd className="mt-1 font-mono text-xl font-semibold text-ink">{result.cpuUtilization}%</dd>
+              <dd className="mt-0.5 font-mono text-[10px] text-ink-muted">busy / total time</dd>
             </div>
-            <div className="rounded-lg border border-slate-800 bg-slate-900 p-3">
-              <dt className="text-[11px] font-medium text-slate-400">Throughput</dt>
-              <dd className="mt-1 font-mono text-xl font-semibold text-purple-400">{result.throughput}</dd>
-              <dd className="mt-0.5 font-mono text-[10px] text-slate-500">processes per time unit</dd>
+            <div className="border-l border-t border-rule px-4 py-3.5 sm:border-t-0">
+              <dt className="text-[11px] font-medium text-ink-muted">Throughput</dt>
+              <dd className="mt-1 font-mono text-xl font-semibold text-ink">{result.throughput}</dd>
+              <dd className="mt-0.5 font-mono text-[10px] text-ink-muted">processes per time unit</dd>
             </div>
           </dl>
 
-          <section className="rounded-lg border border-slate-800 bg-slate-900 p-4" aria-labelledby="gantt-heading">
+          <section className="rounded-lg border border-rule bg-sheet p-4" aria-labelledby="gantt-heading">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-              <h2 id="gantt-heading" className="text-sm font-semibold text-slate-200">
+              <h2 id="gantt-heading" className="text-sm font-semibold text-ink">
                 Gantt chart
               </h2>
-              <p className="font-mono text-[11px] text-slate-500">{result.totalTime} ms total</p>
+              <p className="font-mono text-[11px] text-ink-muted">{result.totalTime} ms total</p>
             </div>
 
             <div className="overflow-x-auto pb-1">
               <div className="min-w-[420px]">
-                <div className="flex h-11 w-full overflow-hidden rounded-md border border-slate-700 bg-slate-950">
+                <div className="flex h-11 w-full overflow-hidden rounded-md border border-rule-strong bg-well">
                   {result.ganttChart.map((segment, index) => {
                     const isIdle = segment.processId === 'IDLE';
                     return (
@@ -360,10 +360,10 @@ export const CpuSchedulingView: React.FC<CpuSchedulingViewProps> = ({
                           flexGrow: Math.max(segment.duration, 0.25),
                           flexBasis: 0,
                           minWidth: 18,
-                          backgroundColor: isIdle ? '#1e293b' : segment.color || '#4f46e5',
+                          backgroundColor: isIdle ? '#e9e2d1' : segment.color || '#1f3f66',
                         }}
-                        className={`flex h-full min-w-0 items-center justify-center border-r border-slate-950/60 font-mono text-xs font-semibold ${
-                          isIdle ? 'text-slate-500' : 'text-white'
+                        className={`flex h-full min-w-0 items-center justify-center border-r border-rule/60 font-mono text-xs font-semibold ${
+                          isIdle ? 'text-ink-muted' : 'text-white'
                         }`}
                         title={`${isIdle ? 'Idle' : segment.processId}: ${segment.startTime} to ${segment.endTime} ms (${segment.duration} ms)`}
                       >
@@ -373,14 +373,14 @@ export const CpuSchedulingView: React.FC<CpuSchedulingViewProps> = ({
                   })}
                 </div>
 
-                <div className="relative mt-1 h-4 font-mono text-[10px] text-slate-500" aria-hidden="true">
+                <div className="relative mt-1 h-4 font-mono text-[10px] text-ink-muted" aria-hidden="true">
                   <span className="absolute left-0">0</span>
                   <span className="absolute right-0">{result.totalTime} ms</span>
                 </div>
               </div>
             </div>
 
-            <ul className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-slate-400">
+            <ul className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-ink-muted">
               {processes.map((process) => (
                 <li key={process.id} className="flex items-center gap-1.5">
                   <span className="h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: process.color }} aria-hidden="true" />
@@ -388,7 +388,7 @@ export const CpuSchedulingView: React.FC<CpuSchedulingViewProps> = ({
                 </li>
               ))}
               <li className="flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-sm bg-slate-700" aria-hidden="true" />
+                <span className="h-2.5 w-2.5 rounded-sm bg-rule" aria-hidden="true" />
                 idle
               </li>
             </ul>
@@ -396,48 +396,48 @@ export const CpuSchedulingView: React.FC<CpuSchedulingViewProps> = ({
         </div>
       </div>
 
-      <section className="rounded-lg border border-slate-800 bg-slate-900 p-4" aria-labelledby="cpu-results-heading">
+      <section className="rounded-lg border border-rule bg-sheet p-4" aria-labelledby="cpu-results-heading">
         <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
-          <h2 id="cpu-results-heading" className="text-sm font-semibold text-slate-200">
+          <h2 id="cpu-results-heading" className="text-sm font-semibold text-ink">
             Per-process results
           </h2>
-          <p className="font-mono text-[10px] text-slate-500">AT arrival · BT burst · CT completion · TAT turnaround · WT waiting · RT response</p>
+          <p className="font-mono text-[10px] text-ink-muted">AT arrival · BT burst · CT completion · TAT turnaround · WT waiting · RT response</p>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-left text-xs">
             <thead>
-              <tr className="border-b border-slate-800 text-slate-400">
+              <tr className="border-b border-rule text-ink-muted">
                 <th scope="col" className="px-3 py-2.5 font-medium">Process</th>
                 <th scope="col" className="px-3 py-2.5 font-medium">AT</th>
                 <th scope="col" className="px-3 py-2.5 font-medium">BT</th>
                 <th scope="col" className="px-3 py-2.5 font-medium">Priority</th>
                 <th scope="col" className="px-3 py-2.5 font-medium">CT</th>
-                <th scope="col" className="px-3 py-2.5 font-medium text-emerald-400">TAT</th>
-                <th scope="col" className="px-3 py-2.5 font-medium text-indigo-400">WT</th>
+                <th scope="col" className="px-3 py-2.5 font-medium text-good">TAT</th>
+                <th scope="col" className="px-3 py-2.5 font-medium text-accent">WT</th>
                 <th scope="col" className="px-3 py-2.5 font-medium">RT</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800 font-mono">
+            <tbody className="divide-y divide-rule font-mono">
               {result.processMetrics.map((metric) => (
-                <tr key={metric.id} className="transition-colors hover:bg-slate-800/40">
-                  <td className="px-3 py-2.5 font-semibold text-slate-200">{metric.id}</td>
-                  <td className="px-3 py-2.5 text-slate-300">{metric.arrivalTime}</td>
-                  <td className="px-3 py-2.5 text-slate-300">{metric.burstTime}</td>
-                  <td className="px-3 py-2.5 text-slate-400">{metric.priority}</td>
-                  <td className="px-3 py-2.5 text-slate-200">{metric.completionTime}</td>
-                  <td className="px-3 py-2.5 font-semibold text-emerald-400">{metric.turnaroundTime}</td>
-                  <td className="px-3 py-2.5 font-semibold text-indigo-400">{metric.waitingTime}</td>
-                  <td className="px-3 py-2.5 text-slate-300">{metric.responseTime}</td>
+                <tr key={metric.id} className="transition-colors hover:bg-wash">
+                  <td className="px-3 py-2.5 font-semibold text-ink">{metric.id}</td>
+                  <td className="px-3 py-2.5 text-ink-soft">{metric.arrivalTime}</td>
+                  <td className="px-3 py-2.5 text-ink-soft">{metric.burstTime}</td>
+                  <td className="px-3 py-2.5 text-ink-muted">{metric.priority}</td>
+                  <td className="px-3 py-2.5 text-ink">{metric.completionTime}</td>
+                  <td className="px-3 py-2.5 font-semibold text-good">{metric.turnaroundTime}</td>
+                  <td className="px-3 py-2.5 font-semibold text-accent">{metric.waitingTime}</td>
+                  <td className="px-3 py-2.5 text-ink-soft">{metric.responseTime}</td>
                 </tr>
               ))}
-              <tr className="border-t border-slate-700 bg-slate-950/60 font-semibold">
-                <td colSpan={5} className="px-3 py-3 text-right text-[11px] font-medium text-slate-400">
+              <tr className="border-t border-rule-strong bg-well font-semibold">
+                <td colSpan={5} className="px-3 py-3 text-right text-[11px] font-medium text-ink-muted">
                   Averages
                 </td>
-                <td className="px-3 py-3 font-mono text-sm text-emerald-400">{result.avgTurnaroundTime} ms</td>
-                <td className="px-3 py-3 font-mono text-sm text-indigo-400">{result.avgWaitingTime} ms</td>
-                <td className="px-3 py-3 font-mono text-sm text-slate-300">{result.avgResponseTime} ms</td>
+                <td className="px-3 py-3 font-mono text-sm text-good">{result.avgTurnaroundTime} ms</td>
+                <td className="px-3 py-3 font-mono text-sm text-accent">{result.avgWaitingTime} ms</td>
+                <td className="px-3 py-3 font-mono text-sm text-ink-soft">{result.avgResponseTime} ms</td>
               </tr>
             </tbody>
           </table>
@@ -445,18 +445,18 @@ export const CpuSchedulingView: React.FC<CpuSchedulingViewProps> = ({
       </section>
 
       {showComparison && (
-        <section className="space-y-4 rounded-lg border border-amber-500/30 bg-slate-900 p-5" aria-labelledby="cpu-comparison-heading">
+        <section className="space-y-4 rounded-lg border border-warn-line/30 bg-sheet p-5" aria-labelledby="cpu-comparison-heading">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div>
-              <h2 id="cpu-comparison-heading" className="text-sm font-semibold text-slate-100">
+              <h2 id="cpu-comparison-heading" className="text-sm font-semibold text-ink">
                 All six algorithms on this workload
               </h2>
-              <p className="mt-1 text-xs text-slate-400">
+              <p className="mt-1 text-xs text-ink-muted">
                 The same processes, measured by average waiting time. Round robin uses a time slice of {quantum} ms.
               </p>
             </div>
             {bestAlgoForWaitingTime && (
-              <p className="text-xs text-emerald-300">
+              <p className="text-xs text-good">
                 Lowest waiting time: <strong className="font-semibold">{bestAlgoForWaitingTime.name}</strong>
               </p>
             )}
@@ -469,37 +469,37 @@ export const CpuSchedulingView: React.FC<CpuSchedulingViewProps> = ({
                 <div
                   key={algo}
                   className={`rounded-lg border p-3.5 ${
-                    isBest ? 'border-emerald-500/40 bg-emerald-950/20' : 'border-slate-800 bg-slate-950/60'
+                    isBest ? 'border-good-line/40 bg-good-bg' : 'border-rule bg-well'
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-medium text-slate-200">{name}</span>
+                    <span className="text-xs font-medium text-ink">{name}</span>
                     {isBest && (
-                      <span className="rounded bg-emerald-950 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-300">
+                      <span className="rounded bg-good-bg px-1.5 py-0.5 text-[10px] font-semibold text-good">
                         Lowest WT
                       </span>
                     )}
                   </div>
 
-                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-800">
+                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-wash">
                     <div
-                      className={`h-full rounded-full ${isBest ? 'bg-emerald-500' : 'bg-indigo-500'}`}
+                      className={`h-full rounded-full ${isBest ? 'bg-good' : 'bg-accent-strong'}`}
                       style={{ width: `${Math.max(4, (comparison.avgWaitingTime / maxWaitingTime) * 100)}%` }}
                     />
                   </div>
 
                   <dl className="mt-2.5 space-y-1 font-mono text-xs">
                     <div className="flex justify-between gap-3">
-                      <dt className="text-slate-500">Average waiting</dt>
-                      <dd className="font-semibold text-indigo-300">{comparison.avgWaitingTime} ms</dd>
+                      <dt className="text-ink-muted">Average waiting</dt>
+                      <dd className="font-semibold text-accent">{comparison.avgWaitingTime} ms</dd>
                     </div>
                     <div className="flex justify-between gap-3">
-                      <dt className="text-slate-500">Average turnaround</dt>
-                      <dd className="text-emerald-300">{comparison.avgTurnaroundTime} ms</dd>
+                      <dt className="text-ink-muted">Average turnaround</dt>
+                      <dd className="text-good">{comparison.avgTurnaroundTime} ms</dd>
                     </div>
                     <div className="flex justify-between gap-3">
-                      <dt className="text-slate-500">CPU utilisation</dt>
-                      <dd className="text-amber-300">{comparison.cpuUtilization}%</dd>
+                      <dt className="text-ink-muted">CPU utilisation</dt>
+                      <dd className="text-warn">{comparison.cpuUtilization}%</dd>
                     </div>
                   </dl>
                 </div>
@@ -509,18 +509,18 @@ export const CpuSchedulingView: React.FC<CpuSchedulingViewProps> = ({
         </section>
       )}
 
-      <section className="overflow-hidden rounded-lg border border-slate-800 bg-slate-900/60">
+      <section className="overflow-hidden rounded-lg border border-rule bg-sheet">
         <button
           type="button"
           onClick={() => setShowLogs((value) => !value)}
           aria-expanded={showLogs}
-          className="flex w-full items-center justify-between px-4 py-3 text-xs font-medium text-slate-400 transition-colors hover:text-slate-200"
+          className="flex w-full items-center justify-between px-4 py-3 text-xs font-medium text-ink-muted transition-colors hover:text-ink"
         >
           <span>Simulation log ({result.executionLogs.length} entries)</span>
-          <span className="text-indigo-400">{showLogs ? 'Hide' : 'Show'}</span>
+          <span className="text-accent">{showLogs ? 'Hide' : 'Show'}</span>
         </button>
         {showLogs && (
-          <div className="max-h-56 space-y-1 overflow-y-auto border-t border-slate-800 bg-slate-950 p-4 font-mono text-xs leading-relaxed text-slate-300">
+          <div className="max-h-56 space-y-1 overflow-y-auto border-t border-rule bg-well p-4 font-mono text-xs leading-relaxed text-ink-soft">
             {result.executionLogs.map((log, index) => (
               <p key={index}>{log}</p>
             ))}
